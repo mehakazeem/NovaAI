@@ -248,3 +248,6 @@ input.addEventListener("keypress", function(e){
     }
 
 });
+sendBtn.addEventListener("click", () => {
+    alert("Button Working");
+});
