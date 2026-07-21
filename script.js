@@ -176,3 +176,75 @@ if(chatInput){
 
 console.log("%c🚀 NovaAI Loaded Successfully",
 "color:#00E5FF;font-size:18px;font-weight:bold;");
+
+
+/*========================================
+        NOVAAI CHAT DEMO
+========================================*/
+
+const input = document.querySelector(".chat-input input");
+const sendBtn = document.querySelector(".chat-input button");
+const chatBody = document.querySelector(".chat-body");
+
+const replies = [
+    "🤖 That's a great question! I'm here to help you.",
+    "💡 You can build amazing projects using HTML, CSS and JavaScript.",
+    "🚀 Keep learning every day and you'll become a great developer.",
+    "🔐 Cyber Security and AI are the future of technology.",
+    "😊 Thanks for trying NovaAI Demo!"
+];
+
+function sendMessage() {
+
+    const message = input.value.trim();
+
+    if (message === "") return;
+
+    // User Message
+    const userMsg = document.createElement("div");
+    userMsg.className = "message user";
+
+    userMsg.innerHTML = `
+        <div class="text">${message}</div>
+    `;
+
+    chatBody.appendChild(userMsg);
+
+    input.value = "";
+
+    chatBody.scrollTop = chatBody.scrollHeight;
+
+    // AI Reply
+    setTimeout(() => {
+
+        const aiMsg = document.createElement("div");
+
+        aiMsg.className = "message ai";
+
+        const randomReply =
+            replies[Math.floor(Math.random() * replies.length)];
+
+        aiMsg.innerHTML = `
+            <img src="logo.png" alt="AI">
+            <div class="text">${randomReply}</div>
+        `;
+
+        chatBody.appendChild(aiMsg);
+
+        chatBody.scrollTop = chatBody.scrollHeight;
+
+    }, 800);
+
+}
+
+sendBtn.addEventListener("click", sendMessage);
+
+input.addEventListener("keypress", function(e){
+
+    if(e.key === "Enter"){
+
+        sendMessage();
+
+    }
+
+});
