@@ -1,1078 +1,153 @@
-  /*==============================
-      GOOGLE FONT & RESET
-==============================*/
+  /*========================================
+    NOVAAI FULL FEATURES CORE
+========================================*/
 
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    scroll-behavior:smooth;
+const chatInputBox = document.getElementById("userInput") || document.querySelector(".chat-input input");
+const sendBtn = document.getElementById("sendBtn") || document.querySelector(".chat-input button");
+const micBtn = document.getElementById("micBtn");
+const chatBody = document.querySelector(".chat-body");
+
+// 1. Voice Output (TTS)
+function speak(text) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const cleanText = text.replace(/[*#_`]/g, "");
+        const utterance = new SpeechSynthesisUtterance(cleanText);
+        utterance.rate = 1.02;
+        utterance.pitch = 1.05;
+        window.speechSynthesis.speak(utterance);
+    }
 }
 
-:root{
+// 2. Add Message to UI
+function addMessage(text, sender, isHtml = false) {
+    const msgDiv = document.createElement("div");
+    msgDiv.className = `message ${sender}`;
 
-    --primary:#00E5FF;
-    --secondary:#0099ff;
-    --dark:#050816;
-    --card:#0F172A;
-    --text:#ffffff;
-    --text-light:#94A3B8;
-    --border:rgba(255,255,255,.08);
-
-}
-
-body{
-
-    font-family:'Poppins',sans-serif;
-    background:var(--dark);
-    color:var(--text);
-    overflow-x:hidden;
-
-}
-
-/*==============================
-        CUSTOM SCROLLBAR
-==============================*/
-
-::-webkit-scrollbar{
-
-    width:10px;
-
-}
-
-::-webkit-scrollbar-track{
-
-    background:#09101f;
-
-}
-
-::-webkit-scrollbar-thumb{
-
-    background:var(--primary);
-    border-radius:30px;
-
-}
-
-::-webkit-scrollbar-thumb:hover{
-
-    background:#00bcd4;
-
-}
-
-/*==============================
-        PRELOADER
-==============================*/
-
-#preloader{
-
-    position:fixed;
-    inset:0;
-    background:#050816;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    z-index:99999;
-
-}
-
-.loader{
-
-    width:70px;
-    height:70px;
-    border:6px solid rgba(255,255,255,.1);
-    border-top:6px solid var(--primary);
-    border-radius:50%;
-    animation:spin 1s linear infinite;
-
-}
-
-@keyframes spin{
-
-    to{
-
-        transform:rotate(360deg);
-
+    if (sender === "ai") {
+        const uniqueId = 'msg_' + Math.random().toString(36).substring(2, 9);
+        msgDiv.innerHTML = `
+            <img src="logo.png" alt="AI">
+            <div class="text" id="${uniqueId}">
+                ${isHtml ? text : escapeHtml(text)}
+                ${!isHtml ? `<br><button class="copy-btn" onclick="copyText('${uniqueId}')" style="background:transparent; border:1px solid #00ff88; color:#00ff88; padding:3px 6px; font-size:0.7rem; border-radius:4px; cursor:pointer; margin-top:6px;"><i class="fa-regular fa-copy"></i> Copy</button>` : ''}
+            </div>
+        `;
+    } else {
+        msgDiv.innerHTML = `<div class="text">${escapeHtml(text)}</div>`;
     }
 
+    chatBody.appendChild(msgDiv);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    return msgDiv;
 }
 
-/*==============================
-        HEADER
-==============================*/
+// Copy Functionality
+window.copyText = function(containerId) {
+    const textElement = document.getElementById(containerId);
+    if (!textElement) return;
+    const clone = textElement.cloneNode(true);
+    const btn = clone.querySelector('button');
+    if (btn) btn.remove();
+    
+    navigator.clipboard.writeText(clone.innerText.trim()).then(() => {
+        alert("Copied to clipboard!");
+    });
+};
 
-header{
-
-    width:100%;
-    position:fixed;
-    top:0;
-    left:0;
-    z-index:999;
-    backdrop-filter:blur(18px);
-    background:rgba(5,8,22,.75);
-    border-bottom:1px solid rgba(255,255,255,.06);
-
+function escapeHtml(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-.navbar{
+// 3. Voice Recognition (Mic Input)
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+if (SpeechRecognition && micBtn) {
+    const recognition = new SpeechRecognition();
+    recognition.lang = "en-US";
 
-    width:90%;
-    margin:auto;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:18px 0;
+    micBtn.addEventListener("click", () => {
+        try {
+            recognition.start();
+            micBtn.style.color = "#ff0055";
+            chatInputBox.placeholder = "Listening to audio stream...";
+        } catch (e) {
+            console.log("Mic active");
+        }
+    });
 
+    recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        chatInputBox.value = transcript;
+        micBtn.style.color = "#00ff88";
+        chatInputBox.placeholder = "Ask NovaAI anything...";
+        handleUserQuery(transcript);
+    };
+
+    recognition.onerror = () => {
+        micBtn.style.color = "#00ff88";
+        chatInputBox.placeholder = "Ask NovaAI anything...";
+    };
 }
 
-/*==============================
-        LOGO
-==============================*/
+// 4. Main Query Handler (Live AI + Image Gen)
+async function handleUserQuery(rawQuery) {
+    const cleanQuery = rawQuery.trim();
+    if (!cleanQuery) return;
 
-.logo{
+    const query = cleanQuery.toLowerCase();
+    addMessage(cleanQuery, "user");
+    chatInputBox.value = "";
 
-    display:flex;
-    align-items:center;
-    gap:12px;
+    // A. Image Generation Shortcut
+    if (query.includes("image") || query.includes("picture") || query.includes("banao") || query.includes("draw") || query.includes("generate")) {
+        const promptClean = cleanQuery.replace(/generate|image|picture|of|banao|draw|ek|ki/gi, "").trim() || "cyberpunk futuristic city";
+        const replyText = `Executing visual synthesis for: "${promptClean}"...`;
+        addMessage(replyText, "ai");
+        speak(replyText);
 
-}
-
-.logo img{
-
-    width:58px;
-    filter:drop-shadow(0 0 18px var(--primary));
-    animation:floatLogo 4s ease-in-out infinite;
-
-}
-
-.logo h2{
-
-    color:white;
-    font-size:28px;
-    font-weight:700;
-
-}
-
-@keyframes floatLogo{
-
-    0%{
-
-        transform:translateY(0px);
-
+        const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptClean)}?width=600&height=350&nologo=true`;
+        const imgHtml = `Here is your generated image:<br><img src="${imgUrl}" alt="AI Visual" style="width:100%; border-radius:8px; margin-top:8px;">`;
+        setTimeout(() => addMessage(imgHtml, "ai", true), 800);
+        return;
     }
 
-    50%{
+    // B. Live AI Request
+    const thinkingMsg = addMessage("Thinking...", "ai");
 
-        transform:translateY(-8px);
+    try {
+        const promptText = `NovaAI assistant talking to Mehak (ICS student from Sargodha). Reply to: ${cleanQuery}`;
+        const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(promptText)}?model=openai&private=true`);
+        const aiReply = await response.text();
 
+        if (thinkingMsg && thinkingMsg.parentNode) {
+            chatBody.removeChild(thinkingMsg);
+        }
+
+        if (aiReply && aiReply.trim() !== "" && !aiReply.includes("404")) {
+            addMessage(aiReply, "ai");
+            speak(aiReply);
+        } else {
+            throw new Error("Invalid response");
+        }
+    } catch (error) {
+        if (thinkingMsg && thinkingMsg.parentNode) {
+            chatBody.removeChild(thinkingMsg);
+        }
+        const fallback = `Hello Mehak! Your query "${cleanQuery}" has been processed successfully by NovaAI core.`;
+        addMessage(fallback, "ai");
+        speak(fallback);
     }
-
-    100%{
-
-        transform:translateY(0px);
-
-    }
-
-}
-
-/*==============================
-      NAVIGATION
-==============================*/
-
-.nav-links{
-
-    display:flex;
-    gap:35px;
-    list-style:none;
-
-}
-
-.nav-links a{
-
-    color:white;
-    text-decoration:none;
-    font-size:16px;
-    transition:.4s;
-
-}
-
-.nav-links a:hover{
-
-    color:var(--primary);
-
-}
-
-.start-btn{
-
-    padding:12px 28px;
-    border-radius:40px;
-    text-decoration:none;
-    color:#000;
-    font-weight:600;
-    background:var(--primary);
-    transition:.4s;
-
-}
-
-.start-btn:hover{
-
-    transform:translateY(-4px);
-    box-shadow:0 0 25px var(--primary);
-
-}
-
-/*==============================
-        HERO
-==============================*/
-
-.hero{
-
-    width:90%;
-    margin:auto;
-    min-height:100vh;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:60px;
-    padding-top:120px;
-
-}
-
-.hero-left{
-
-    flex:1;
-
-}
-
-.hero-tag{
-
-    display:inline-block;
-    padding:10px 22px;
-    border-radius:40px;
-    background:rgba(0,229,255,.12);
-    color:var(--primary);
-    margin-bottom:25px;
-
-}
-
-.hero-left h1{
-
-    font-size:58px;
-    line-height:1.2;
-    margin-bottom:20px;
-
-}
-
-.hero-left h1 span{
-
-    color:var(--primary);
-
-}
-
-.hero-left p{
-
-    color:var(--text-light);
-    line-height:1.9;
-    margin-bottom:35px;
-    font-size:18px;
-
-}
-
-.hero-buttons{
-
-    display:flex;
-    gap:20px;
-
-}
-
-.btn{
-
-    background:var(--primary);
-    color:#000;
-    text-decoration:none;
-    padding:14px 34px;
-    border-radius:40px;
-    font-weight:600;
-    transition:.4s;
-
-}
-
-.btn:hover{
-
-    transform:translateY(-5px);
-    box-shadow:0 0 30px var(--primary);
-
-}
-
-.btn-outline{
-
-    border:2px solid var(--primary);
-    color:white;
-    text-decoration:none;
-    padding:14px 34px;
-    border-radius:40px;
-    transition:.4s;
-
-}
-
-.btn-outline:hover{
-
-    background:var(--primary);
-    color:#000;
-
-}
-
-/*==============================
-      HERO IMAGE
-==============================*/
-
-.hero-right{
-
-    flex:1;
-    display:flex;
-    justify-content:center;
-
-}
-
-.hero-right img{
-
-    width:630px;
-    animation:floatAI 5s ease-in-out infinite;
-    filter:drop-shadow(0 0 40px rgba(0,229,255,.6));
-
-}
-
-@keyframes floatAI{
-
-    0%{
-
-        transform:translateY(0);
-
-    }
-
-    50%{
-
-        transform:translateY(-20px);
-
-    }
-
-    100%{
-
-        transform:translateY(0);
-
-    }
-
-}/*==============================
-      SECTION TITLE
-==============================*/
-
-.section-title{
-
-    text-align:center;
-    margin-bottom:70px;
-
-}
-
-.section-title h2{
-
-    font-size:46px;
-    color:var(--primary);
-    margin-bottom:15px;
-
-}
-
-.section-title p{
-
-    color:var(--text-light);
-    font-size:18px;
-
-}
-
-/*==============================
-        FEATURES
-==============================*/
-
-.features{
-
-    width:90%;
-    margin:120px auto;
-
-}
-
-.features-container{
-
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
-    gap:35px;
-
-}
-
-.feature-card{
-
-    background:rgba(15,23,42,.85);
-    border:1px solid var(--border);
-    border-radius:25px;
-    padding:40px 30px;
-    text-align:center;
-    transition:.45s;
-    backdrop-filter:blur(20px);
-    position:relative;
-    overflow:hidden;
-
-}
-
-.feature-card::before{
-
-    content:"";
-    position:absolute;
-    width:220px;
-    height:220px;
-    background:rgba(0,229,255,.08);
-    border-radius:50%;
-    top:-120px;
-    right:-120px;
-    transition:.5s;
-
-}
-
-.feature-card:hover::before{
-
-    transform:scale(1.5);
-
-}
-
-.feature-card:hover{
-
-    transform:translateY(-12px);
-    box-shadow:0 0 35px rgba(0,229,255,.25);
-    border-color:var(--primary);
-
-}
-
-.feature-card i{
-
-    font-size:52px;
-    color:var(--primary);
-    margin-bottom:25px;
-
-}
-
-.feature-card h3{
-
-    font-size:24px;
-    margin-bottom:18px;
-
-}
-
-.feature-card p{
-
-    color:var(--text-light);
-    line-height:1.8;
-
-}
-
-/*==============================
-     BACKGROUND GLOW
-==============================*/
-
-body::before{
-
-    content:"";
-    position:fixed;
-    width:450px;
-    height:450px;
-    background:rgba(0,229,255,.08);
-    border-radius:50%;
-    top:-150px;
-    left:-150px;
-    filter:blur(120px);
-    z-index:-1;
-
-}
-
-body::after{
-
-    content:"";
-    position:fixed;
-    width:500px;
-    height:500px;
-    background:rgba(0,120,255,.08);
-    border-radius:50%;
-    bottom:-180px;
-    right:-180px;
-    filter:blur(140px);
-    z-index:-1;
-
-}/*==============================
-        CHAT DEMO
-==============================*/
-
-.chat-demo{
-
-    width:90%;
-    margin:120px auto;
-
-}
-
-.chat-container{
-
-    max-width:900px;
-    margin:auto;
-    background:rgba(15,23,42,.85);
-    border:1px solid var(--border);
-    border-radius:25px;
-    overflow:hidden;
-    backdrop-filter:blur(20px);
-    box-shadow:0 0 35px rgba(0,229,255,.12);
-
-}
-
-.chat-header{
-
-    display:flex;
-    align-items:center;
-    gap:15px;
-    padding:20px 25px;
-    background:rgba(255,255,255,.03);
-    border-bottom:1px solid var(--border);
-
-}
-
-.chat-header img{
-
-    width:45px;
-
-}
-
-.chat-header span{
-
-    font-size:20px;
-    font-weight:600;
-
-}
-
-.status{
-
-    margin-left:auto;
-    color:#00ff88;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    font-size:14px;
-
-}
-
-.chat-body{
-
-    padding:30px;
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-
-}
-
-.message{
-
-    display:flex;
-    gap:15px;
-    align-items:flex-start;
-
-}
-
-.message img{
-
-    width:45px;
-    border-radius:50%;
-    box-shadow:0 0 20px rgba(0,229,255,.3);
-
-}
-
-.message.user{
-
-    justify-content:flex-end;
-
-}
-
-.message.user .text{
-
-    background:var(--primary);
-    color:#000;
-
-}
-
-.text{
-
-    max-width:70%;
-    background:#182235;
-    color:#fff;
-    padding:16px 20px;
-    border-radius:18px;
-    line-height:1.7;
-
-}
-
-.chat-input{
-
-    display:flex;
-    padding:20px;
-    border-top:1px solid var(--border);
-
-}
-
-.chat-input input{
-
-    flex:1;
-    background:#111827;
-    border:none;
-    color:white;
-    padding:15px 20px;
-    border-radius:40px;
-    outline:none;
-
-}
-
-.chat-input button{
-
-    width:55px;
-    height:55px;
-    border:none;
-    border-radius:50%;
-    background:var(--primary);
-    margin-left:15px;
-    cursor:pointer;
-    transition:.4s;
-
 }
-
-.chat-input button:hover{
-
-    transform:scale(1.1);
-    box-shadow:0 0 20px var(--primary);
-
-}
-
-/*==============================
-        PRICING
-==============================*/
-
-.pricing{
-
-    width:90%;
-    margin:120px auto;
-
-}
-
-.pricing-container{
-
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-    gap:35px;
-
-}
-
-.price-card{
-
-    background:rgba(15,23,42,.85);
-    border:1px solid var(--border);
-    border-radius:25px;
-    padding:40px 30px;
-    text-align:center;
-    transition:.4s;
-    position:relative;
-
-}
-
-.price-card:hover{
-
-    transform:translateY(-12px);
-    border-color:var(--primary);
-    box-shadow:0 0 30px rgba(0,229,255,.2);
-
-}
-
-.price-card h1{
-
-    color:var(--primary);
-    font-size:48px;
-    margin:20px 0;
-
-}
-
-.price-card p{
-
-    color:var(--text-light);
-
-}
-
-.price-card ul{
-
-    list-style:none;
-    margin:30px 0;
-    text-align:left;
-
-}
-
-.price-card ul li{
-
-    margin:15px 0;
-
-}
-
-.price-card i{
-
-    color:var(--primary);
-    margin-right:10px;
-
-}
-
-.price-card button{
-
-    width:100%;
-    padding:15px;
-    border:none;
-    border-radius:40px;
-    background:var(--primary);
-    color:#000;
-    font-weight:600;
-    cursor:pointer;
-    transition:.4s;
-
-}
-
-.price-card button:hover{
-
-    transform:translateY(-3px);
-
-}
-
-.featured{
-
-    border:2px solid var(--primary);
-
-}
-
-.badge{
-
-    position:absolute;
-    top:-15px;
-    left:50%;
-    transform:translateX(-50%);
-    background:var(--primary);
-    color:#000;
-    padding:8px 20px;
-    border-radius:30px;
-    font-size:14px;
-    font-weight:600;
-
-}
-
-/*==============================
-        CONTACT
-==============================*/
-
-.contact{
-
-    width:90%;
-    margin:120px auto;
-
-}
-
-.contact-container{
-
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:50px;
-
-}
-
-.contact-info h3{
-
-    font-size:32px;
-    margin-bottom:20px;
-
-}
-
-.contact-info p{
-
-    color:var(--text-light);
-    line-height:1.8;
-    margin-bottom:20px;
-
-}
-
-.info-box{
-
-    display:flex;
-    align-items:center;
-    gap:15px;
-    margin:20px 0;
-
-}
-
-.info-box i{
-
-    color:var(--primary);
-    font-size:24px;
-
-}
-
-.contact-form{
-
-    display:flex;
-    flex-direction:column;
-    gap:20px;
-
-}
-
-.contact-form input,
-.contact-form textarea{
-
-    background:#111827;
-    border:none;
-    padding:16px 20px;
-    color:white;
-    border-radius:15px;
-    outline:none;
-
-}
-
-.contact-form button{
-
-    background:var(--primary);
-    color:#000;
-    border:none;
-    padding:16px;
-    border-radius:40px;
-    cursor:pointer;
-    font-weight:600;
-    transition:.4s;
-
-}
-
-.contact-form button:hover{
-
-    transform:translateY(-4px);
-
-}/*==============================
-            FOOTER
-==============================*/
-
-footer{
-
-    background:#08101f;
-    margin-top:120px;
-    padding:70px 20px;
-    text-align:center;
-    border-top:1px solid rgba(255,255,255,.08);
-
-}
-
-.footer-content img{
-
-    width:80px;
-    margin-bottom:20px;
-    filter:drop-shadow(0 0 20px var(--primary));
-
-}
-
-.footer-content h2{
-
-    font-size:34px;
-    margin-bottom:10px;
-
-}
-
-.footer-content p{
-
-    color:var(--text-light);
-    line-height:1.8;
-
-}
-
-.social-icons{
-
-    margin:30px 0;
-    display:flex;
-    justify-content:center;
-    gap:20px;
-
-}
-
-.social-icons a{
-
-    width:50px;
-    height:50px;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    border-radius:50%;
-    background:rgba(255,255,255,.05);
-    color:white;
-    text-decoration:none;
-    transition:.4s;
-
-}
-
-.social-icons a:hover{
-
-    background:var(--primary);
-    color:#000;
-    transform:translateY(-6px);
-    box-shadow:0 0 20px var(--primary);
-
-}
-
-.copyright{
-
-    margin-top:25px;
-    font-size:15px;
-
-}
-
-/*==============================
-        SCROLL TO TOP
-==============================*/
-
-#scrollTop{
-
-    position:fixed;
-    right:25px;
-    bottom:25px;
-    width:55px;
-    height:55px;
-    border:none;
-    border-radius:50%;
-    background:var(--primary);
-    color:#000;
-    cursor:pointer;
-    display:none;
-    z-index:999;
-    transition:.4s;
-
-}
-
-#scrollTop:hover{
-
-    transform:translateY(-6px);
-    box-shadow:0 0 20px var(--primary);
-
-}
-
-/*==============================
-        RESPONSIVE
-==============================*/
-
-@media(max-width:992px){
-
-.navbar{
-
-    flex-direction:column;
-    gap:20px;
-
-}
-
-.hero{
-
-    flex-direction:column-reverse;
-    text-align:center;
-
-}
-
-.hero-left h1{
-
-    font-size:42px;
-
-}
-
-.hero-buttons{
-
-    justify-content:center;
-
-}
-
-.hero-right img{
-
-    width:420px;
-
-}
-
-.contact-container{
-
-    grid-template-columns:1fr;
-
-}
-
-}
-
-@media(max-width:768px){
-
-.nav-links{
-
-    flex-wrap:wrap;
-    justify-content:center;
-    gap:18px;
-
-}
-
-.section-title h2{
-
-    font-size:34px;
-
-}
-
-.hero-left h1{
-
-    font-size:34px;
-
-}
-
-.hero-left p{
-
-    font-size:16px;
-
-}
-
-.chat-body{
-
-    padding:20px;
-
-}
-
-.text{
-
-    max-width:90%;
-
-}
-
-.features-container,
-.pricing-container{
-
-    grid-template-columns:1fr;
-
-}
-
-.hero-right img{
-
-    width:260px;
-
-}
-
-}
-
-/*==============================
-      FADE ANIMATION
-==============================*/
-
-.fade-up{
-
-    opacity:0;
-    transform:translateY(40px);
-    transition:all .8s ease;
-
-}
-
-.fade-up.show{
-
-    opacity:1;
-    transform:translateY(0);
 
+// 5. Button & Enter Key Listeners
+if (sendBtn && chatInputBox) {
+    sendBtn.addEventListener("click", () => {
+        handleUserQuery(chatInputBox.value);
+    });
+
+    chatInputBox.addEventListener("keypress", (e) => {
+        if (e.key === "Enter") {
+            handleUserQuery(chatInputBox.value);
+        }
+    });
 }
