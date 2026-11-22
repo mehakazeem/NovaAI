@@ -1,26 +1,756 @@
-  <!DOCTYPE html> 
+  <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NovaAI | Intelligent AI Assistant</title>
+    <title>NovaAI v5.6 | Workspace Chat + 50+ Features</title>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="style.css">
-
-    <!-- Google Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        :root {
+            --primary: #00E5FF;
+            --secondary: #00E5FF;
+            --dark: #050816;
+            --card: #0F172A;
+            --text: #ffffff;
+            --text-light: #94A3B8;
+            --border: rgba(255, 255, 255, .08);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--dark);
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #09101f; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 30px; }
+
+        header {
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 999;
+            backdrop-filter: blur(18px);
+            background: rgba(5, 8, 22, .78);
+            border-bottom: 1px solid rgba(255, 255, 255, .06);
+        }
+
+        .navbar {
+            width: 90%;
+            margin: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo img {
+            width: 45px;
+            height: 45px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 18px var(--primary));
+        }
+
+        .logo h2 {
+            color: white;
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+            transition: .35s;
+        }
+
+        .nav-links a:hover { color: var(--primary); }
+
+        .start-btn {
+            padding: 10px 24px;
+            border-radius: 30px;
+            text-decoration: none;
+            color: #000;
+            font-weight: 600;
+            background: var(--primary);
+            transition: .35s;
+        }
+
+        .hero {
+            width: 90%;
+            margin: auto;
+            min-height: 100vh;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 60px;
+            padding-top: 120px;
+        }
+
+        .hero-left { flex: 1; }
+        .hero-tag {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 40px;
+            background: rgba(0, 229, 255, .12);
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        .hero-left h1 { font-size: 50px; line-height: 1.2; margin-bottom: 20px; }
+        .hero-left h1 span { color: var(--primary); }
+        .hero-left p { color: var(--text-light); line-height: 1.8; margin-bottom: 30px; font-size: 17px; }
+        .hero-buttons { display: flex; gap: 20px; flex-wrap: wrap; }
+
+        .btn {
+            background: var(--primary);
+            color: #000;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            font-weight: 600;
+            transition: .35s;
+            display: inline-block;
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            transition: .35s;
+            display: inline-block;
+        }
+
+        .btn-outline:hover { background: var(--primary); color: #000; }
+
+        @keyframes floatGirl {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-12px) scale(1.02); }
+            100% { transform: translateY(0px) scale(1); }
+        }
+
+        @keyframes activePulse {
+            0% { filter: drop-shadow(0 0 28px rgba(0, 229, 255, .65)); }
+            50% { filter: drop-shadow(0 0 48px rgba(0, 229, 255, .95)); }
+            100% { filter: drop-shadow(0 0 28px rgba(0, 229, 255, .65)); }
+        }
+
+        @keyframes msgPop {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: scale(0.6); opacity: 0.45; }
+            40% { transform: scale(1.1); opacity: 1; }
+        }
+
+        @keyframes priceCardClick {
+            0% { transform: scale(1) translateY(0); box-shadow: 0 0 0 rgba(0, 229, 255, 0); }
+            40% { transform: scale(1.035) translateY(-8px); box-shadow: 0 14px 36px rgba(0, 229, 255, 0.35); }
+            100% { transform: scale(1) translateY(-4px); box-shadow: 0 10px 26px rgba(0, 229, 255, 0.22); }
+        }
+
+        .hero-right { flex: 1; display: flex; justify-content: center; }
+        .hero-right img {
+            width: 100%;
+            max-width: 550px;
+            height: auto;
+            animation: floatGirl 4s ease-in-out infinite;
+            filter: drop-shadow(0 0 35px rgba(0, 229, 255, .6));
+            transition: .3s;
+        }
+        .hero-right img.speaking {
+            animation: floatGirl 2.2s ease-in-out infinite, activePulse 1.3s ease-in-out infinite;
+        }
+
+        .section-title { text-align: center; margin-bottom: 60px; }
+        .section-title h2 { font-size: 40px; color: var(--primary); margin-bottom: 10px; }
+        .section-title p { color: var(--text-light); font-size: 16px; }
+
+        .features { width: 90%; margin: 100px auto; }
+        .features-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px; }
+        .feature-card {
+            background: rgba(15, 23, 42, .85);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: .35s;
+        }
+        .feature-card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 0 30px rgba(0, 229, 255, .2); }
+        .feature-card i { font-size: 42px; color: var(--primary); margin-bottom: 18px; }
+        .feature-card h3 { font-size: 21px; margin-bottom: 12px; }
+        .feature-card p { color: var(--text-light); line-height: 1.7; font-size: 14.5px; }
+
+        .chat-demo { width: 90%; margin: 100px auto; }
+        .chat-container-wrapper {
+            display: flex;
+            max-width: 1220px;
+            margin: auto;
+            gap: 20px;
+        }
+
+        .chat-sidebar {
+            width: 285px;
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            height: 690px;
+        }
+
+        .new-chat-btn {
+            background: var(--primary);
+            color: #000;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-bottom: 10px;
+            transition: .25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .new-chat-btn:hover { box-shadow: 0 0 16px var(--primary); }
+
+        .export-chat-btn {
+            background: rgba(0, 229, 255, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            padding: 9px 12px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.82rem;
+            cursor: pointer;
+            margin-bottom: 12px;
+            transition: .25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+        }
+        .export-chat-btn:hover { background: rgba(0, 229, 255, 0.22); }
+
+        .chat-search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 8px 11px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            outline: none;
+            margin-bottom: 10px;
+            transition: .25s;
+        }
+        .chat-search-input:focus { border-color: var(--primary); }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .history-item {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid transparent;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 0.83rem;
+            color: var(--text-light);
+            cursor: pointer;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: .22s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+        .history-item:hover { background: rgba(0, 229, 255, 0.1); color: var(--primary); }
+        .history-item.active {
+            background: rgba(0, 229, 255, 0.16);
+            border-color: var(--primary);
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .main-chat-area { flex: 1; }
+        .chat-container {
+            background: rgba(15, 23, 42, .88);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+            height: 690px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 35px rgba(0, 229, 255, .12);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 15px 22px;
+            background: rgba(255, 255, 255, .03);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+        }
+        .chat-header img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+        .chat-header span.title-text { font-size: 17px; font-weight: 600; }
+
+        .hub-open-btn {
+            background: rgba(0, 229, 255, 0.14);
+            border: 1px solid rgba(0, 229, 255, 0.45);
+            color: var(--primary);
+            padding: 6px 12px;
+            border-radius: 18px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: .25s;
+        }
+        .hub-open-btn:hover { background: var(--primary); color: #000; }
+
+        .live-state-pill {
+            font-size: 0.75rem;
+            padding: 5px 12px;
+            border-radius: 20px;
+            background: rgba(0, 229, 255, 0.14);
+            color: var(--primary);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            margin-left: auto;
+        }
+
+        .clear-msg-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            padding: 6px 10px;
+            border-radius: 18px;
+            font-size: 0.74rem;
+            cursor: pointer;
+            transition: .25s;
+        }
+        .clear-msg-btn:hover { border-color: #ff5c77; color: #ff5c77; }
+
+        .voice-toggle-btn {
+            background: rgba(0, 229, 255, 0.08);
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: .3s;
+        }
+        .voice-toggle-btn:hover { background: rgba(0, 229, 255, 0.2); }
+        .voice-toggle-btn.muted { border-color: #ff0055; color: #ff0055; background: transparent; }
+
+        .chat-body {
+            flex: 1;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            overflow-y: auto;
+        }
+
+        .workspace-welcome {
+            margin: auto 0;
+            text-align: center;
+            padding: 12px 10px;
+        }
+        .workspace-badge {
+            width: 58px;
+            height: 58px;
+            margin: 0 auto 14px auto;
+            border-radius: 16px;
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            box-shadow: 0 0 22px rgba(0, 229, 255, 0.18);
+        }
+        .workspace-badge img {
+            width: 42px;
+            height: 42px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px rgba(0, 229, 255, 0.5));
+        }
+        .workspace-welcome h3 {
+            font-size: 26px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 6px;
+        }
+        .workspace-welcome p {
+            color: var(--text-light);
+            font-size: 13.5px;
+            margin-bottom: 20px;
+        }
+
+        .starter-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(130px, 1fr));
+            gap: 12px;
+            max-width: 820px;
+            margin: 0 auto;
+            text-align: left;
+        }
+        .starter-tile {
+            background: rgba(24, 34, 53, 0.9);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 13px 12px;
+            cursor: pointer;
+            transition: .25s;
+        }
+        .starter-tile:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            background: rgba(0, 229, 255, 0.08);
+        }
+        .starter-tile i {
+            color: var(--primary);
+            font-size: 15px;
+            margin-bottom: 7px;
+            display: block;
+        }
+        .starter-tile .st-title {
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: #fff;
+            margin-bottom: 3px;
+        }
+        .starter-tile .st-sub {
+            font-size: 0.72rem;
+            color: var(--text-light);
+            line-height: 1.35;
+        }
+
+        .message {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+            animation: msgPop 0.25s ease-out;
+        }
+        .message img.avatar-img { width: 38px; height: 38px; border-radius: 50%; object-fit: cover; flex-shrink: 0; }
+        .message.user { justify-content: flex-end; }
+        .message.user .text {
+            background: var(--primary);
+            color: #000;
+            font-weight: 500;
+            border-bottom-right-radius: 4px;
+        }
+
+        .text {
+            max-width: 82%;
+            background: #182235;
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 16px;
+            border-bottom-left-radius: 4px;
+            line-height: 1.65;
+            font-size: 0.93rem;
+            word-wrap: break-word;
+        }
+
+        .msg-meta {
+            margin-top: 6px;
+            font-size: 0.68rem;
+            opacity: 0.72;
+        }
+
+        .typing-dots {
+            display: inline-flex;
+            gap: 4px;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+        .typing-dots span {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: dotBounce 1.2s infinite ease-in-out;
+        }
+        .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+        .attached-preview {
+            display: none;
+            padding: 8px 20px;
+            background: rgba(0, 229, 255, 0.08);
+            border-top: 1px solid var(--border);
+            font-size: 0.84rem;
+            color: var(--primary);
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px 18px;
+            border-top: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.25);
+            align-items: center;
+            gap: 10px;
+        }
+        .icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--primary);
+            font-size: 1.15rem;
+            cursor: pointer;
+            padding: 6px;
+            transition: .25s;
+        }
+        .icon-btn:hover { transform: scale(1.1); color: #7cf2ff; }
+
+        .chat-input input[type="text"] {
+            flex: 1;
+            background: #111827;
+            border: none;
+            color: white;
+            padding: 14px 18px;
+            border-radius: 30px;
+            outline: none;
+            font-size: 0.94rem;
+        }
+        .chat-input button#sendBtn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            transition: .3s;
+            flex-shrink: 0;
+        }
+        .chat-input button#sendBtn:hover { transform: scale(1.08); box-shadow: 0 0 16px var(--primary); }
+
+        .features-modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(2, 6, 18, 0.82);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .features-modal-backdrop.open { display: flex; }
+
+        .features-modal {
+            width: 100%;
+            max-width: 960px;
+            max-height: 85vh;
+            background: #0d1526;
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            border-radius: 22px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
+        }
+
+        .modal-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .modal-top h3 { color: var(--primary); font-size: 22px; }
+        .modal-close-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 7px 14px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        .modal-close-btn:hover { border-color: #ff5c77; color: #ff5c77; }
+
+        .modal-controls { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .modal-search {
+            flex: 1;
+            min-width: 220px;
+            background: #111827;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 12px;
+            outline: none;
+            font-size: 0.88rem;
+        }
+        .modal-search:focus { border-color: var(--primary); }
+
+        .cat-pills { display: flex; gap: 8px; flex-wrap: wrap; }
+        .cat-pill {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text-light);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.76rem;
+            cursor: pointer;
+            transition: .2s;
+        }
+        .cat-pill.active, .cat-pill:hover {
+            background: rgba(0, 229, 255, 0.16);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .features-grid-50 {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+            gap: 12px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .f50-item {
+            background: rgba(15, 23, 42, 0.95);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 12px 14px;
+            cursor: pointer;
+            transition: .2s;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .f50-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            background: rgba(0, 229, 255, 0.08);
+        }
+        .f50-title { font-size: 0.85rem; font-weight: 600; color: #fff; }
+        .f50-cat { font-size: 0.7rem; color: var(--primary); }
+
+        .pricing { width: 90%; margin: 100px auto; }
+        .pricing-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+        .price-card {
+            background: rgba(15, 23, 42, .85);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 35px 25px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .price-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(0, 229, 255, 0.45);
+        }
+        .price-card.clicked-anim {
+            animation: priceCardClick 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+            border-color: var(--primary);
+        }
+        .price-card.selected-plan {
+            border-color: var(--primary);
+            box-shadow: 0 0 24px rgba(0, 229, 255, 0.22);
+        }
+        .price-card h1 { color: var(--primary); font-size: 42px; margin: 15px 0; }
+        .price-card ul { list-style: none; margin: 25px 0; text-align: left; }
+        .price-card ul li { margin: 12px 0; color: var(--text-light); }
+        .price-card button { width: 100%; padding: 12px; border: none; border-radius: 30px; background: var(--primary); color: #000; font-weight: 600; cursor: pointer; transition: .3s; }
+        .price-card button:hover { transform: translateY(-3px); box-shadow: 0 0 20px var(--primary); }
+        .featured { border: 2px solid var(--primary); }
+        .plan-feedback {
+            margin-top: 12px;
+            font-size: 0.82rem;
+            color: var(--primary);
+            min-height: 20px;
+            font-weight: 500;
+        }
+
+        .contact { width: 90%; margin: 100px auto; }
+        .contact-container { display: grid; grid-template-columns: 1fr; max-width: 800px; margin: auto; }
+        .contact-form { display: flex; flex-direction: column; gap: 15px; }
+        .contact-form input, .contact-form textarea { background: #111827; border: none; padding: 15px; color: white; border-radius: 12px; outline: none; }
+        .contact-form button { background: var(--primary); color: #000; border: none; padding: 14px; border-radius: 30px; font-weight: 600; cursor: pointer; }
+
+        footer { background: #08101f; margin-top: 100px; padding: 50px 20px; text-align: center; border-top: 1px solid rgba(255, 255, 255, .08); }
+        .footer-content img {
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 15px var(--primary));
+        }
+        .footer-content h2 { font-size: 24px; margin-bottom: 8px; }
+        .footer-content p { color: var(--text-light); font-size: 14px; line-height: 1.6; }
+
+        @media(max-width: 900px) {
+            .chat-container-wrapper { flex-direction: column; }
+            .chat-sidebar { width: 100%; height: auto; max-height: 240px; }
+            .starter-cards-grid { grid-template-columns: repeat(2, minmax(120px, 1fr)); }
+            .hero { flex-direction: column-reverse; text-align: center; }
+            .hero-buttons { justify-content: center; }
+            .hero-right img { width: 280px; }
+        }
+    </style>
 </head>
 
 <body>
 
-    <!--================ HEADER ================-->
     <header>
         <nav class="navbar">
             <div class="logo">
@@ -29,7 +759,7 @@
             </div>
             <ul class="nav-links">
                 <li><a href="#home">Home</a></li>
-                <li><a href="#features">Features</a></li>
+                <li><a href="#features">Use Cases</a></li>
                 <li><a href="#chat">Demo Chat</a></li>
                 <li><a href="#pricing">Pricing</a></li>
                 <li><a href="#contact">Contact</a></li>
@@ -38,213 +768,1075 @@
         </nav>
     </header>
 
-    <!--================ HERO SECTION ================-->
     <section class="hero" id="home">
         <div class="hero-left">
-            <span class="hero-tag">🚀 Next Generation AI Assistant</span>
+            <span class="hero-tag">🏆 Expo Edition v5.6 • 50+ Features • Gemini + Live Market AI</span>
             <h1>Experience the Power of <span>Artificial Intelligence</span></h1>
-            <p>
-                NovaAI is your intelligent assistant for coding, writing, learning, brainstorming and solving problems instantly with advanced AI technology.
-            </p>
+            <p>NovaAI connects to your local Gemini backend with live market data for natural conversations, general knowledge, updates, crypto setups, image vision, file uploads, voice, saved chats, and 50+ smart features.</p>
             <div class="hero-buttons">
                 <a href="#chat" class="btn">Start Chat</a>
-                <a href="#features" class="btn-outline">Learn More</a>
+                <a href="#features" class="btn-outline">Explore Features</a>
             </div>
         </div>
         <div class="hero-right">
-            <img src="ai-avatar.png" alt="NovaAI Assistant">
+            <img src="ai-avatar.png" alt="NovaAI Assistant" id="heroAvatar">
         </div>
     </section>
 
-    <!--================ FEATURES ================-->
     <section class="features" id="features">
         <div class="section-title">
-            <h2>Powerful AI Features</h2>
-            <p>Everything you need in one intelligent AI assistant.</p>
+            <h2>AI Assistant Use Cases</h2>
+            <p>Built for learning, market analysis, media/file workflows, coding, and daily tasks.</p>
         </div>
         <div class="features-container">
-            <div class="feature-card">
-                <i class="fa-solid fa-comments"></i>
-                <h3>AI Chat</h3>
-                <p>Ask anything and receive intelligent, human-like responses instantly.</p>
+            <div class="feature-card" onclick="selectUseCase('World Knowledge, Updates, Locations & Books')">
+                <i class="fa-solid fa-earth-americas"></i>
+                <h3>Knowledge & Updates</h3>
+                <p>Ask about current topics, celebrities, places, books, coding, and general knowledge.</p>
             </div>
-            <div class="feature-card">
+            <div class="feature-card" onclick="selectUseCase('Crypto, Forex & Stock Market Analysis')">
+                <i class="fa-solid fa-chart-line"></i>
+                <h3>Markets & Setups</h3>
+                <p>Live prices, timeframes, trend structure, support/resistance, and educational trade plans.</p>
+            </div>
+            <div class="feature-card" onclick="selectUseCase('Task & Browser Automation')">
+                <i class="fa-solid fa-bolt"></i>
+                <h3>Commands & Tools</h3>
+                <p>Open any website or domain, run calculations, check time, and manage saved chats.</p>
+            </div>
+            <div class="feature-card" onclick="selectUseCase('Picture, Video & Document Upload')">
+                <i class="fa-solid fa-file-lines"></i>
+                <h3>Media & Vision Docs</h3>
+                <p>Upload pictures, videos, and documents for preview, analysis, and Q&A.</p>
+            </div>
+            <div class="feature-card" onclick="selectUseCase('AI Image & Visual Generation')">
+                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                <h3>AI Image & Visuals</h3>
+                <p>Generate custom visual ideas and images directly from chat prompts.</p>
+            </div>
+            <div class="feature-card" onclick="selectUseCase('Study Notes, Writing & Code Assistant')">
                 <i class="fa-solid fa-code"></i>
-                <h3>Code Generator</h3>
-                <p>Generate HTML, CSS, JavaScript, Python and many more programming languages.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fa-solid fa-image"></i>
-                <h3>Image Generator</h3>
-                <p>Create professional AI-generated artwork, logos, posters and creative designs.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fa-solid fa-language"></i>
-                <h3>Translator</h3>
-                <p>Translate content instantly into multiple languages with AI accuracy.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fa-solid fa-microphone"></i>
-                <h3>Voice Assistant</h3>
-                <p>Interact naturally using voice commands with intelligent speech recognition.</p>
-            </div>
-            <div class="feature-card">
-                <i class="fa-solid fa-graduation-cap"></i>
-                <h3>AI Learning</h3>
-                <p>Learn programming, mathematics, science and many other subjects faster with AI.</p>
+                <h3>Study & Code Help</h3>
+                <p>Break down tough concepts, draft content, and debug code step by step.</p>
             </div>
         </div>
     </section>
 
-    <!--================ AI CHAT DEMO ================-->
     <section class="chat-demo" id="chat">
         <div class="section-title">
             <h2>Try NovaAI</h2>
-            <p>Experience intelligent conversations with our AI assistant.</p>
+            <p>Clean AI workspace with saved sessions, 50+ features, and live responses.</p>
         </div>
 
-        <div class="chat-container">
-            <div class="chat-header">
-                <img src="logo.png" alt="NovaAI">
-                <span>NovaAI Assistant</span>
-                <div class="status">
-                    <i class="fa-solid fa-circle"></i> Online
-                </div>
+        <div class="chat-container-wrapper">
+            <div class="chat-sidebar">
+                <button class="new-chat-btn" id="newChatBtn"><i class="fa-solid fa-plus"></i> New Chat</button>
+                <button class="export-chat-btn" id="exportChatBtn"><i class="fa-solid fa-download"></i> Export Chat (.txt)</button>
+                <input type="text" class="chat-search-input" id="chatSearchInput" placeholder="🔍 Search saved chats...">
+                <div style="font-size: 0.78rem; color: var(--text-light); margin-bottom: 8px;">Saved Chats</div>
+                <div class="history-list" id="sidebarHistory"></div>
             </div>
 
-            <div class="chat-body">
-                <div class="message ai">
-                    <img src="logo.png" alt="AI">
-                    <div class="text">
-                        👋 Hello! I'm NovaAI. How can I help you today?
-                    </div>
-                </div>
-            </div>
+            <div class="chat-container main-chat-area">
+                <div class="chat-header">
+                    <img src="logo.png" alt="NovaAI">
+                    <span class="title-text" id="activeChatTitle">NovaAI Workspace</span>
 
-            <div class="chat-input">
-                <button type="button" id="micBtn" title="Voice Input" style="background:transparent; border:none; color:#00ff88; font-size:1.1rem; cursor:pointer; margin-right:10px;">
-                    <i class="fa-solid fa-microphone"></i>
-                </button>
-                <input type="text" id="userInput" placeholder="Ask NovaAI anything..." autocomplete="off">
-                <button type="button" id="sendBtn">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
+                    <button type="button" class="hub-open-btn" id="open50HubBtn">
+                        <i class="fa-solid fa-grid-2"></i> 50+ Features
+                    </button>
+
+                    <div class="live-state-pill" id="liveStatePill">🔵 Ready</div>
+
+                    <button type="button" class="clear-msg-btn" id="clearCurrentChatBtn" title="Reset current chat">
+                        <i class="fa-solid fa-broom"></i> Reset
+                    </button>
+
+                    <button class="voice-toggle-btn" id="voiceToggleBtn" title="Toggle Voice ON/OFF">
+                        <i class="fa-solid fa-volume-high" id="voiceIcon"></i>
+                    </button>
+                </div>
+
+                <div class="chat-body" id="chatBody"></div>
+
+                <div class="attached-preview" id="attachedPreview">
+                    <span id="attachedFileLabel">No file attached</span>
+                    <button type="button" id="clearAttachmentBtn" style="background:transparent; border:none; color:#ff4d6d; cursor:pointer; font-weight:600;">Remove ✕</button>
+                </div>
+
+                <div class="chat-input">
+                    <input type="file" id="fileUploadInput" accept="image/*,video/*,.txt,.md,.csv,.json,.pdf,.doc,.docx" style="display:none;">
+                    <button type="button" id="attachBtn" class="icon-btn" title="Upload Picture, Video, or Document">
+                        <i class="fa-solid fa-paperclip"></i>
+                    </button>
+                    <button type="button" id="micBtn" class="icon-btn" title="Voice Input" style="color:var(--primary);">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    <input type="text" id="userInput" placeholder="Ask NovaAI anything..." autocomplete="off">
+                    <button type="button" id="sendBtn">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </section>
 
-    <!--================ PRICING ================-->
+    <div class="features-modal-backdrop" id="featuresModalBackdrop" onclick="if(event.target===this) close50Hub()">
+        <div class="features-modal">
+            <div class="modal-top">
+                <h3>⚡ NovaAI 50+ Features Directory (52 Features)</h3>
+                <button type="button" class="modal-close-btn" onclick="close50Hub()">Close ✕</button>
+            </div>
+            <div class="modal-controls">
+                <input type="text" class="modal-search" id="featureHubSearch" placeholder="Search across 50+ features (e.g. rsi, code, roman urdu, uuid, email)...">
+            </div>
+            <div class="cat-pills" id="featureCatPills"></div>
+            <div class="features-grid-50" id="featuresGrid50"></div>
+        </div>
+    </div>
+
     <section class="pricing" id="pricing">
         <div class="section-title">
             <h2>Choose Your Plan</h2>
-            <p>Flexible pricing for everyone, from students to enterprises.</p>
+            <p>Flexible options for students, traders, and creators.</p>
         </div>
         <div class="pricing-container">
-            <div class="price-card">
+            <div class="price-card" id="cardFree" onclick="triggerPriceCardAnim('cardFree', 'Free')">
                 <h3>Free</h3>
                 <h1>$0</h1>
                 <p>Forever Free</p>
                 <ul>
-                    <li><i class="fa-solid fa-check"></i> Basic AI Chat</li>
-                    <li><i class="fa-solid fa-check"></i> 20 Messages / Day</li>
-                    <li><i class="fa-solid fa-check"></i> Code Assistance</li>
-                    <li><i class="fa-solid fa-check"></i> Community Support</li>
+                    <li><i class="fa-solid fa-check"></i> Multi-Session Saved Chats</li>
+                    <li><i class="fa-solid fa-check"></i> File & Media Previews</li>
+                    <li><i class="fa-solid fa-check"></i> Live Market & AI Chat</li>
                 </ul>
-                <button>Get Started</button>
+                <button onclick="event.stopPropagation(); selectPlan('Free', 'cardFree')">Get Started</button>
+                <div class="plan-feedback" id="feedbackFree"></div>
             </div>
 
-            <div class="price-card featured">
-                <span class="badge">Most Popular</span>
+            <div class="price-card featured" id="cardPro" onclick="triggerPriceCardAnim('cardPro', 'Pro')">
+                <span class="badge" style="background:var(--primary); color:#000; padding:5px 15px; border-radius:20px; font-size:12px; font-weight:600;">Most Popular</span>
                 <h3>Pro</h3>
                 <h1>$19</h1>
                 <p>Per Month</p>
                 <ul>
-                    <li><i class="fa-solid fa-check"></i> Unlimited AI Chat</li>
-                    <li><i class="fa-solid fa-check"></i> Image Generation</li>
-                    <li><i class="fa-solid fa-check"></i> Voice Assistant</li>
-                    <li><i class="fa-solid fa-check"></i> Priority Support</li>
-                    <li><i class="fa-solid fa-check"></i> AI Coding Tools</li>
+                    <li><i class="fa-solid fa-check"></i> Gemini + Live Market Breakdowns</li>
+                    <li><i class="fa-solid fa-check"></i> Multi-Timeframe Chart Setups</li>
+                    <li><i class="fa-solid fa-check"></i> Image Vision, Voice & Commands</li>
                 </ul>
-                <button>Choose Pro</button>
-            </div>
-
-            <div class="price-card">
-                <h3>Enterprise</h3>
-                <h1>Custom</h1>
-                <p>Contact Us</p>
-                <ul>
-                    <li><i class="fa-solid fa-check"></i> Unlimited Everything</li>
-                    <li><i class="fa-solid fa-check"></i> Dedicated AI Models</li>
-                    <li><i class="fa-solid fa-check"></i> Team Collaboration</li>
-                    <li><i class="fa-solid fa-check"></i> Enterprise Security</li>
-                    <li><i class="fa-solid fa-check"></i> 24/7 Premium Support</li>
-                </ul>
-                <button>Contact Sales</button>
+                <button onclick="event.stopPropagation(); selectPlan('Pro', 'cardPro')">Choose Pro</button>
+                <div class="plan-feedback" id="feedbackPro"></div>
             </div>
         </div>
     </section>
 
-    <!--================ CONTACT ================-->
     <section class="contact" id="contact">
         <div class="section-title">
             <h2>Contact NovaAI</h2>
-            <p>Have a question or want to collaborate? Get in touch with us.</p>
+            <p>Send a message or feedback anytime.</p>
         </div>
         <div class="contact-container">
-            <div class="contact-info">
-                <h3>Let's Connect</h3>
-                <p>NovaAI is designed to help students, developers, businesses and creators with powerful AI solutions.</p>
-                <div class="info-box">
-                    <i class="fa-solid fa-envelope"></i>
-                    <span>support@novaai.com</span>
-                </div>
-                <div class="info-box">
-                    <i class="fa-solid fa-phone"></i>
-                    <span>+92 300 1234567</span>
-                </div>
-                <div class="info-box">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <span>Pakistan</span>
-                </div>
-            </div>
-
-            <form class="contact-form">
+            <form class="contact-form" onsubmit="event.preventDefault(); alert('Message sent successfully!'); this.reset();">
                 <input type="text" placeholder="Your Name" required>
                 <input type="email" placeholder="Your Email" required>
-                <textarea rows="6" placeholder="Write your message..." required></textarea>
+                <textarea rows="5" placeholder="Write your message..." required></textarea>
                 <button type="submit">Send Message</button>
             </form>
         </div>
     </section>
 
-    <!--================ FOOTER ================-->
     <footer>
         <div class="footer-content">
             <img src="logo.png" alt="NovaAI Logo">
             <h2>NovaAI</h2>
-            <p>Intelligent AI Assistant for the Future.</p>
-            <div class="social-icons">
-                <a href="#"><i class="fab fa-facebook-f"></i></a>
-                <a href="#"><i class="fab fa-instagram"></i></a>
-                <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                <a href="#"><i class="fab fa-github"></i></a>
-            </div>
-            <p class="copyright">
-                © 2026 NovaAI. All Rights Reserved.
-                <br><br>
-                Designed & Developed by <strong>Mehak Azeem</strong>
+            <p>Intelligent AI Assistant for Learning, Trading & Productivity.</p>
+            <p class="copyright" style="margin-top:15px; color:var(--text-light); font-size:14px;">
+                © 2026 NovaAI. All Rights Reserved.<br>Designed & Developed by <strong>Mehak Azeem</strong>
             </p>
         </div>
     </footer>
 
-    <!--================ SCROLL TO TOP ================-->
-    <button id="scrollTop">
-        <i class="fa-solid fa-arrow-up"></i>
-    </button>
+    <script>
+        const NOVA_FEATURES_52 = [
+            { title: "Live Crypto Price Check", cat: "Markets", prompt: "Give me live price and 24h performance for BTC and ETH." },
+            { title: "4H Swing Trade Setup", cat: "Markets", prompt: "Give me a clear 4h technical setup for NEAR/USDT with support, resistance, and scenarios." },
+            { title: "1H Scalping / Intraday View", cat: "Markets", prompt: "Analyze STRK/USDT on the 1h timeframe with key levels and momentum." },
+            { title: "RSI & EMA Indicator Breakdown", cat: "Markets", prompt: "Explain RSI and 50/200 EMA trend reading for SOL/USDT in simple words." },
+            { title: "Forex Pair Trend Analysis", cat: "Markets", prompt: "Give me a 4h market trend and key levels overview for EUR/USD." },
+            { title: "Support & Resistance Zones", cat: "Markets", prompt: "Identify key support and resistance levels and how traders react to them on BTC/USDT." },
+            { title: "Breakout vs Pullback Plan", cat: "Markets", prompt: "Compare breakout confirmation vs pullback entry rules on a chart setup." },
+            { title: "Risk & Position Sizing Guide", cat: "Markets", prompt: "Show how to calculate risk per trade and stop-loss placement responsibly." },
 
-    <!--================ JAVASCRIPT ================-->
-    <script src="script.js"></script>
+            { title: "Concept Explainer (ELI5)", cat: "Study", prompt: "Explain how blockchain and smart contracts work in simple Roman Urdu/English." },
+            { title: "Quick Study Notes", cat: "Study", prompt: "Create structured study bullet notes on Photosynthesis or Newton's Laws." },
+            { title: "Practice Quiz Generator", cat: "Study", prompt: "Give me 5 multiple-choice practice questions with answers on World Geography." },
+            { title: "Book & Topic Summary", cat: "Study", prompt: "Summarize the main takeaways of Atomic Habits in 6 clear points." },
+            { title: "Roman Urdu <-> English Help", cat: "Study", prompt: "Translate and polish this line in natural Roman Urdu and formal English: Aaj ka din bohat acha raha." },
+            { title: "Exam Revision Plan", cat: "Study", prompt: "Make a focused 3-day revision timetable for an upcoming exam." },
+            { title: "Compare Two Topics", cat: "Study", prompt: "Compare Machine Learning vs Deep Learning with clear bullet points." },
 
+            { title: "Professional Email Writer", cat: "Writing", prompt: "Write a polite, clear email requesting a project demo meeting." },
+            { title: "Social Media Caption", cat: "Writing", prompt: "Write 3 catchy captions for an AI project showcase post." },
+            { title: "Bullet Point Summarizer", cat: "Writing", prompt: "Summarize the benefits of AI assistants in daily productivity in 5 bullets." },
+            { title: "Pros & Cons Table", cat: "Writing", prompt: "List pros and cons of remote work vs office work." },
+            { title: "Daily To-Do Schedule", cat: "Writing", prompt: "Create a balanced productive daily schedule for a student and developer." },
+            { title: "Speech / Presentation Script", cat: "Writing", prompt: "Write a short 60-second presentation intro for NovaAI at a tech expo." },
+            { title: "Idea Brainstormer", cat: "Writing", prompt: "Give 7 creative project ideas combining AI and web apps." },
+
+            { title: "Write Code Snippet", cat: "Coding", prompt: "Write a clean JavaScript function to debounce search input." },
+            { title: "Debug / Fix Error", cat: "Coding", prompt: "Explain common causes and fixes for CORS and 429 errors in Node.js APIs." },
+            { title: "Code Line-by-Line Explain", cat: "Coding", prompt: "Explain how async/await and fetch work in JavaScript." },
+            { title: "HTML / CSS UI Tip", cat: "Coding", prompt: "Give clean CSS tips for responsive cards and dark UI." },
+            { title: "SQL / JSON Formatter", cat: "Coding", prompt: "Show an example SQL query with WHERE, ORDER BY, and LIMIT." },
+            { title: "Regex Pattern Helper", cat: "Coding", prompt: "Give a regular expression to validate an email address with explanation." },
+            { title: "Git Commands Cheat Sheet", cat: "Coding", prompt: "List essential Git commands for daily project commits and branches." },
+
+            { title: "Generate AI Image", cat: "Media", prompt: "generate image of futuristic neon AI command center desk" },
+            { title: "Image Vision Q&A", cat: "Media", prompt: "How can I upload an image or chart screenshot for NovaAI to analyze?" },
+            { title: "Video Preview & Notes", cat: "Media", prompt: "How does NovaAI handle uploaded video files in chat?" },
+            { title: "Document / CSV Reader", cat: "Media", prompt: "How can I attach a text, CSV, or document file for summary?" },
+            { title: "Copy Any AI Reply", cat: "Media", prompt: "Tell me how to copy and reuse any AI message cleanly." },
+            { title: "Regenerate Alternative Reply", cat: "Media", prompt: "Give me an alternative, more concise version of your previous answer." },
+
+            { title: "Voice Output (TTS)", cat: "Voice", prompt: "Say hello in a friendly way so I can test voice output." },
+            { title: "Mute / Unmute Voice", cat: "Voice", prompt: "Explain how the voice toggle button works in the chat header." },
+            { title: "Microphone Voice Input", cat: "Voice", prompt: "How do I use the microphone button to speak my prompt?" },
+            { title: "Avatar Speaking Pulse", cat: "Voice", prompt: "What happens on the hero avatar when NovaAI speaks?" },
+            { title: "Multi-Language Speech", cat: "Voice", prompt: "Kya main Roman Urdu aur English dono mein baat kar sakti hoon?" },
+
+            { title: "Multi-Session Saved Chats", cat: "Tools", prompt: "Explain how saved chat threads persist in the sidebar." },
+            { title: "Create New Chat Thread", cat: "Tools", prompt: "How do I start a fresh chat session anytime?" },
+            { title: "Search Saved Chats", cat: "Tools", prompt: "How do I filter my saved chats quickly from the sidebar?" },
+            { title: "Export Chat to .TXT", cat: "Tools", prompt: "How can I download my current chat transcript as a text file?" },
+            { title: "Current Date & Time", cat: "Tools", prompt: "time" },
+            { title: "Instant Math Calculator", cat: "Tools", prompt: "calculate (1450 * 0.15) + 250" },
+            { title: "Open Website Command", cat: "Tools", prompt: "open youtube" },
+
+            { title: "Generate Random UUID", cat: "Tools", prompt: "/uuid" },
+            { title: "Text Word & Char Count", cat: "Tools", prompt: "/wordcount NovaAI workspace is ready for Mehak." },
+            { title: "Base64 Encode Text", cat: "Tools", prompt: "/encode NovaAI v5.6" },
+            { title: "Base64 Decode Text", cat: "Tools", prompt: "/decode Tm92YUFJIFY1LjY=" },
+            { title: "Random Coin Flip", cat: "Tools", prompt: "/flip" },
+            { title: "Random Dice Roll", cat: "Tools", prompt: "/dice" },
+            { title: "Show Slash Commands (/help)", cat: "Tools", prompt: "/help" }
+        ];
+
+        const chatInputBox = document.getElementById("userInput");
+        const sendBtn = document.getElementById("sendBtn");
+        const micBtn = document.getElementById("micBtn");
+        const attachBtn = document.getElementById("attachBtn");
+        const fileUploadInput = document.getElementById("fileUploadInput");
+        const attachedPreview = document.getElementById("attachedPreview");
+        const attachedFileLabel = document.getElementById("attachedFileLabel");
+        const clearAttachmentBtn = document.getElementById("clearAttachmentBtn");
+        const chatBody = document.getElementById("chatBody");
+        const sidebarHistory = document.getElementById("sidebarHistory");
+        const chatSearchInput = document.getElementById("chatSearchInput");
+        const voiceToggleBtn = document.getElementById("voiceToggleBtn");
+        const voiceIcon = document.getElementById("voiceIcon");
+        const newChatBtn = document.getElementById("newChatBtn");
+        const exportChatBtn = document.getElementById("exportChatBtn");
+        const clearCurrentChatBtn = document.getElementById("clearCurrentChatBtn");
+        const open50HubBtn = document.getElementById("open50HubBtn");
+        const featuresModalBackdrop = document.getElementById("featuresModalBackdrop");
+        const featureHubSearch = document.getElementById("featureHubSearch");
+        const featureCatPills = document.getElementById("featureCatPills");
+        const featuresGrid50 = document.getElementById("featuresGrid50");
+        const heroAvatar = document.getElementById("heroAvatar");
+        const liveStatePill = document.getElementById("liveStatePill");
+        const activeChatTitle = document.getElementById("activeChatTitle");
+
+        const BACKEND_CHAT_URL = "http://localhost:3000/api/chat";
+        const ELEVENLABS_API_KEY = "sk_2de989c181095b947ba0718202956d5607e75fa5ffcc5264";
+        const SESSIONS_KEY = "novaai_multi_sessions_v5_6";
+        const ACTIVE_SESSION_KEY = "novaai_active_session_v5_6";
+
+        let isVoiceEnabled = true;
+        let pendingAttachment = null;
+        let sessions = [];
+        let activeSessionId = null;
+        let selectedFeatureCat = "All";
+
+        function currentTimeLabel() {
+            return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+        }
+
+        function setLiveStatus(label) {
+            if (liveStatePill) liveStatePill.textContent = label;
+        }
+
+        function setAvatarSpeaking(active) {
+            if (!heroAvatar) return;
+            if (active) {
+                heroAvatar.classList.add("speaking");
+                setLiveStatus("🔊 Speaking...");
+            } else {
+                heroAvatar.classList.remove("speaking");
+                setLiveStatus("🔵 Ready");
+            }
+        }
+
+        function renderWorkspaceWelcome() {
+            const welcomeDiv = document.createElement("div");
+            welcomeDiv.className = "workspace-welcome";
+            welcomeDiv.dataset.welcomeBanner = "true";
+            welcomeDiv.innerHTML = `
+                <div class="workspace-badge"><img src="logo.png" alt="NovaAI Logo"></div>
+                <h3>How can NovaAI help you today</h3>
+                <p>Ask anything, run a quick tool, or start with one of these workspace actions.</p>
+                <div class="starter-cards-grid">
+                    <div class="starter-tile" onclick="handleUserQuery('Give me a clear 4h technical setup for NEAR/USDT with support and resistance.')">
+                        <i class="fa-solid fa-chart-line"></i>
+                        <div class="st-title">Market Analysis</div>
+                        <div class="st-sub">Live prices, trends & chart levels</div>
+                    </div>
+                    <div class="starter-tile" onclick="handleUserQuery('Explain how async/await works in JavaScript with a clean example.')">
+                        <i class="fa-solid fa-code"></i>
+                        <div class="st-title">Code & Study</div>
+                        <div class="st-sub">Debugging, notes & explanations</div>
+                    </div>
+                    <div class="starter-tile" onclick="open50Hub()">
+                        <i class="fa-solid fa-grid-2"></i>
+                        <div class="st-title">50+ Features</div>
+                        <div class="st-sub">Browse all 52 tools & prompts</div>
+                    </div>
+                    <div class="starter-tile" onclick="handleUserQuery('Give me a concise summary of latest tech and general knowledge highlights.')">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                        <div class="st-title">Quick Research</div>
+                        <div class="st-sub">Summaries, ideas & daily tasks</div>
+                    </div>
+                </div>
+            `;
+            chatBody.appendChild(welcomeDiv);
+        }
+
+        function removeWorkspaceWelcome() {
+            const existing = chatBody.querySelector('[data-welcome-banner="true"]');
+            if (existing) existing.remove();
+        }
+
+        window.open50Hub = function () {
+            if (featuresModalBackdrop) featuresModalBackdrop.classList.add("open");
+            render50FeaturesHub();
+        };
+
+        window.close50Hub = function () {
+            if (featuresModalBackdrop) featuresModalBackdrop.classList.remove("open");
+        };
+
+        if (open50HubBtn) open50HubBtn.addEventListener("click", open50Hub);
+        if (featureHubSearch) featureHubSearch.addEventListener("input", render50FeaturesGrid);
+
+        function render50FeaturesHub() {
+            const categories = ["All", ...new Set(NOVA_FEATURES_52.map(f => f.cat))];
+            if (featureCatPills) {
+                featureCatPills.innerHTML = "";
+                categories.forEach(cat => {
+                    const btn = document.createElement("button");
+                    btn.type = "button";
+                    btn.className = "cat-pill" + (selectedFeatureCat === cat ? " active" : "");
+                    btn.textContent = cat;
+                    btn.onclick = () => {
+                        selectedFeatureCat = cat;
+                        render50FeaturesHub();
+                    };
+                    featureCatPills.appendChild(btn);
+                });
+            }
+            render50FeaturesGrid();
+        }
+
+        function render50FeaturesGrid() {
+            if (!featuresGrid50) return;
+            const q = (featureHubSearch ? featureHubSearch.value : "").trim().toLowerCase();
+            const list = NOVA_FEATURES_52.filter(item => {
+                const catOk = selectedFeatureCat === "All" || item.cat === selectedFeatureCat;
+                const qOk = !q || item.title.toLowerCase().includes(q) || item.cat.toLowerCase().includes(q) || item.prompt.toLowerCase().includes(q);
+                return catOk && qOk;
+            });
+
+            featuresGrid50.innerHTML = "";
+            list.forEach((item, idx) => {
+                const card = document.createElement("div");
+                card.className = "f50-item";
+                card.innerHTML = `
+                    <div class="f50-cat">${idx + 1}. ${escapeHtml(item.cat)}</div>
+                    <div class="f50-title">${escapeHtml(item.title)}</div>
+                `;
+                card.onclick = () => {
+                    close50Hub();
+                    document.getElementById("chat").scrollIntoView({ behavior: "smooth" });
+                    handleUserQuery(item.prompt);
+                };
+                featuresGrid50.appendChild(card);
+            });
+        }
+
+        window.triggerPriceCardAnim = function (cardId, planName) {
+            const card = document.getElementById(cardId);
+            if (!card) return;
+
+            document.querySelectorAll(".price-card").forEach(c => {
+                c.classList.remove("clicked-anim", "selected-plan");
+            });
+            document.querySelectorAll(".plan-feedback").forEach(f => {
+                f.textContent = "";
+            });
+
+            void card.offsetWidth;
+            card.classList.add("clicked-anim", "selected-plan");
+
+            const fb = document.getElementById(planName === "Free" ? "feedbackFree" : "feedbackPro");
+            if (fb) fb.textContent = `✨ ${planName} plan selected`;
+        };
+
+        function createNewSession(title = "New Chat") {
+            const id = "sess_" + Date.now() + "_" + Math.random().toString(36).substring(2, 6);
+            const session = {
+                id,
+                title,
+                messages: []
+            };
+            sessions.unshift(session);
+            activeSessionId = id;
+            persistSessions();
+            renderCurrentSession();
+            renderSidebarSessions();
+        }
+
+        function persistSessions() {
+            localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+            localStorage.setItem(ACTIVE_SESSION_KEY, activeSessionId);
+        }
+
+        function getActiveSession() {
+            return sessions.find(s => s.id === activeSessionId) || sessions[0];
+        }
+
+        function syncCurrentDomToSession(firstUserText = "") {
+            const sess = getActiveSession();
+            if (!sess) return;
+
+            const msgs = [];
+            document.querySelectorAll("#chatBody .message").forEach(msg => {
+                if (msg.dataset.transient === "true") return;
+                const isUser = msg.classList.contains("user");
+                const textElem = msg.querySelector(".text");
+                if (textElem) {
+                    msgs.push({
+                        sender: isUser ? "user" : "ai",
+                        html: isUser ? textElem.innerHTML : `<img src="logo.png" alt="AI" class="avatar-img">${textElem.outerHTML}`,
+                        plain: textElem.innerText.trim()
+                    });
+                }
+            });
+
+            sess.messages = msgs;
+            if (firstUserText && (sess.title === "New Chat" || sess.title === "NovaAI Workspace")) {
+                sess.title = firstUserText.slice(0, 34);
+                if (activeChatTitle) activeChatTitle.textContent = sess.title;
+            }
+            persistSessions();
+            renderSidebarSessions();
+        }
+
+        function renderCurrentSession() {
+            const sess = getActiveSession();
+            if (!sess) return;
+            activeSessionId = sess.id;
+            if (activeChatTitle) activeChatTitle.textContent = sess.title || "NovaAI Workspace";
+
+            chatBody.innerHTML = "";
+            if (!sess.messages || sess.messages.length === 0) {
+                renderWorkspaceWelcome();
+            } else {
+                sess.messages.forEach(m => {
+                    const msgDiv = document.createElement("div");
+                    msgDiv.className = `message ${m.sender}`;
+                    msgDiv.innerHTML = m.sender === "ai"
+                        ? m.html
+                        : `<div class="text">${m.html}</div>`;
+                    chatBody.appendChild(msgDiv);
+                });
+            }
+            chatBody.scrollTop = chatBody.scrollHeight;
+            persistSessions();
+        }
+
+        function deleteSessionById(sessionId, event) {
+            if (event) event.stopPropagation();
+            sessions = sessions.filter(s => s.id !== sessionId);
+            if (sessions.length === 0) {
+                createNewSession("New Chat");
+                return;
+            }
+            if (activeSessionId === sessionId) {
+                activeSessionId = sessions[0].id;
+            }
+            persistSessions();
+            renderCurrentSession();
+            renderSidebarSessions();
+        }
+
+        function renderSidebarSessions() {
+            if (!sidebarHistory) return;
+            const query = (chatSearchInput ? chatSearchInput.value : "").trim().toLowerCase();
+            sidebarHistory.innerHTML = "";
+
+            const filtered = query
+                ? sessions.filter(s => (s.title || "").toLowerCase().includes(query))
+                : sessions;
+
+            filtered.forEach(sess => {
+                const row = document.createElement("div");
+                row.className = "history-item" + (sess.id === activeSessionId ? " active" : "");
+
+                const labelSpan = document.createElement("span");
+                labelSpan.title = sess.title;
+                labelSpan.textContent = `💬 ${sess.title}`;
+                labelSpan.style.overflow = "hidden";
+                labelSpan.style.textOverflow = "ellipsis";
+                labelSpan.style.flex = "1";
+                labelSpan.onclick = () => {
+                    activeSessionId = sess.id;
+                    renderCurrentSession();
+                    renderSidebarSessions();
+                };
+
+                const delBtn = document.createElement("button");
+                delBtn.type = "button";
+                delBtn.title = "Delete chat";
+                delBtn.innerHTML = `<i class="fa-solid fa-trash"></i>`;
+                delBtn.style.background = "transparent";
+                delBtn.style.border = "none";
+                delBtn.style.color = "#ff5c77";
+                delBtn.style.cursor = "pointer";
+                delBtn.style.fontSize = "0.78rem";
+                delBtn.style.padding = "2px 4px";
+                delBtn.onclick = (ev) => deleteSessionById(sess.id, ev);
+
+                row.appendChild(labelSpan);
+                row.appendChild(delBtn);
+                sidebarHistory.appendChild(row);
+            });
+        }
+
+        if (chatSearchInput) {
+            chatSearchInput.addEventListener("input", renderSidebarSessions);
+        }
+
+        if (clearCurrentChatBtn) {
+            clearCurrentChatBtn.addEventListener("click", () => {
+                const sess = getActiveSession();
+                if (!sess) return;
+                sess.title = "New Chat";
+                sess.messages = [];
+                persistSessions();
+                renderCurrentSession();
+                renderSidebarSessions();
+            });
+        }
+
+        function initSessions() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(SESSIONS_KEY) || "null");
+                const savedActive = localStorage.getItem(ACTIVE_SESSION_KEY);
+                if (Array.isArray(saved) && saved.length > 0) {
+                    sessions = saved;
+                    activeSessionId = saved.some(s => s.id === savedActive) ? savedActive : saved[0].id;
+                    renderCurrentSession();
+                    renderSidebarSessions();
+                    return;
+                }
+            } catch (_) {}
+            createNewSession("New Chat");
+        }
+
+        newChatBtn.addEventListener("click", () => createNewSession("New Chat"));
+
+        exportChatBtn.addEventListener("click", () => {
+            const sess = getActiveSession();
+            if (!sess) return;
+            const lines = [`NovaAI Chat Export — ${sess.title}`, "========================================", ""];
+            sess.messages.forEach(m => {
+                const who = m.sender === "user" ? "Mehak" : "NovaAI";
+                lines.push(`${who}: ${m.plain}`, "");
+            });
+            const blob = new Blob([lines.join("\n")], { type: "text/plain;charset=utf-8" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${(sess.title || "novaai-chat").toLowerCase().replace(/[^a-z0-9]+/g, "-")}.txt`;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        voiceToggleBtn.addEventListener("click", () => {
+            isVoiceEnabled = !isVoiceEnabled;
+            if (isVoiceEnabled) {
+                voiceToggleBtn.classList.remove("muted");
+                voiceIcon.className = "fa-solid fa-volume-high";
+                speak("Voice enabled");
+            } else {
+                voiceToggleBtn.classList.add("muted");
+                voiceIcon.className = "fa-solid fa-volume-xmark";
+                if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+                setAvatarSpeaking(false);
+            }
+        });
+
+        attachBtn.addEventListener("click", () => fileUploadInput.click());
+
+        clearAttachmentBtn.addEventListener("click", () => {
+            pendingAttachment = null;
+            fileUploadInput.value = "";
+            attachedPreview.style.display = "none";
+            attachedFileLabel.textContent = "";
+        });
+
+        fileUploadInput.addEventListener("change", (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const isTextDoc = /\.(txt|md|csv|json|log|js|html|css|xml)$/i.test(file.name) || file.type.startsWith("text/");
+            const readerData = new FileReader();
+
+            readerData.onload = () => {
+                pendingAttachment = {
+                    name: file.name,
+                    type: file.type || "application/octet-stream",
+                    sizeKB: (file.size / 1024).toFixed(1),
+                    dataUrl: readerData.result,
+                    textContent: ""
+                };
+
+                if (isTextDoc) {
+                    const textReader = new FileReader();
+                    textReader.onload = () => {
+                        pendingAttachment.textContent = String(textReader.result || "").slice(0, 3500);
+                    };
+                    textReader.readAsText(file);
+                }
+
+                attachedFileLabel.textContent = `📎 Attached: ${file.name} (${pendingAttachment.sizeKB} KB)`;
+                attachedPreview.style.display = "flex";
+            };
+
+            readerData.readAsDataURL(file);
+        });
+
+        document.addEventListener("DOMContentLoaded", () => initSessions());
+
+        async function speak(text) {
+            if (!isVoiceEnabled) return;
+
+            const cleanText = text
+                .replace(/https?:\/\/[^\s]+/g, "")
+                .replace(/<[^>]+>/g, " ")
+                .replace(/[*#_`|~-]/g, " ")
+                .replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{2600}-\u{26FF}]/gu, "")
+                .trim();
+
+            if (!cleanText) return;
+            const speechText = cleanText.length > 300 ? cleanText.substring(0, 300) + "..." : cleanText;
+
+            const isUrduOrRoman = /[a-z]/i.test(speechText) && (
+                speechText.includes("hai") || speechText.includes("hain") ||
+                speechText.includes("kya") || speechText.includes("mein") ||
+                speechText.includes("aur") || speechText.includes("kese") ||
+                /[\u0600-\u06FF]/.test(speechText)
+            );
+
+            const selectedVoiceId = isUrduOrRoman ? "EXAVITQu4vr4xnSDxMaL" : "21m00Tcm4TlvDq8ikWAM";
+            setAvatarSpeaking(true);
+
+            if (ELEVENLABS_API_KEY && ELEVENLABS_API_KEY !== "YOUR_ELEVENLABS_API_KEY_HERE") {
+                try {
+                    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`, {
+                        method: "POST",
+                        headers: {
+                            "Accept": "audio/mpeg",
+                            "Content-Type": "application/json",
+                            "xi-api-key": ELEVENLABS_API_KEY
+                        },
+                        body: JSON.stringify({
+                            text: speechText,
+                            model_id: "eleven_multilingual_v2",
+                            voice_settings: { stability: 0.50, similarity_boost: 0.75 }
+                        })
+                    });
+
+                    if (response.ok) {
+                        const audioBlob = await response.blob();
+                        const audio = new Audio(URL.createObjectURL(audioBlob));
+                        audio.onended = () => setAvatarSpeaking(false);
+                        audio.onerror = () => setAvatarSpeaking(false);
+                        await audio.play();
+                        return;
+                    }
+                } catch (_) {}
+            }
+
+            if ("speechSynthesis" in window) {
+                window.speechSynthesis.cancel();
+                const utterance = new SpeechSynthesisUtterance(speechText);
+                utterance.rate = 1.0;
+                utterance.lang = isUrduOrRoman ? "ur-PK" : "en-US";
+                utterance.onend = () => setAvatarSpeaking(false);
+                utterance.onerror = () => setAvatarSpeaking(false);
+                window.speechSynthesis.speak(utterance);
+            } else {
+                setTimeout(() => setAvatarSpeaking(false), 1500);
+            }
+        }
+
+        function formatCleanText(rawText) {
+            let text = rawText.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            text = text.replace(/\|/g, " • ").replace(/[-]{3,}/g, "");
+            text = text.replace(/^### (.*$)/gim, '<h4 style="color:#00E5FF; margin:10px 0 5px 0;">$1</h4>');
+            text = text.replace(/^## (.*$)/gim, '<h3 style="color:#00E5FF; margin:12px 0 6px 0;">$1</h3>');
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong style="color:var(--primary);">$1</strong>');
+            text = text.replace(/(?<!\*)\*(?!\*)([^*\n]+?)(?<!\*)\*(?!\*)/g, '<em style="color:#e2e8f0;">$1</em>');
+            text = text.replace(/^\* /gim, "• ").replace(/^- /gim, "• ");
+            text = text.replace(/\n/g, "<br>");
+            return text;
+        }
+
+        function addMessage(content, sender, isRawHtml = false, saveToStorage = true, firstUserText = "", isTransient = false) {
+            removeWorkspaceWelcome();
+
+            const msgDiv = document.createElement("div");
+            msgDiv.className = `message ${sender}`;
+            if (isTransient) msgDiv.dataset.transient = "true";
+            const uniqueId = "msg_" + Math.random().toString(36).substring(2, 9);
+            msgDiv.setAttribute("id", uniqueId);
+            const timeStr = currentTimeLabel();
+
+            if (sender === "ai") {
+                const formattedContent = isRawHtml ? content : formatCleanText(content);
+                msgDiv.innerHTML = `
+                    <img src="logo.png" alt="AI" class="avatar-img">
+                    <div class="text">
+                        ${formattedContent}
+                        ${!isTransient ? `<div class="msg-meta">${timeStr}</div>` : ""}
+                        ${!isRawHtml && !isTransient ? `
+                            <div style="margin-top:8px; display:flex; gap:10px;">
+                                <button onclick="copyText('${uniqueId}')" style="background:transparent; border:1px solid #00E5FF; color:#00E5FF; padding:3px 8px; font-size:0.72rem; border-radius:4px; cursor:pointer;"><i class="fa-regular fa-copy"></i> Copy</button>
+                                <button onclick="regenerateLast()" style="background:transparent; border:1px solid #00E5FF; color:#00E5FF; padding:3px 8px; font-size:0.72rem; border-radius:4px; cursor:pointer;"><i class="fa-solid fa-rotate"></i> Regenerate</button>
+                            </div>` : ""}
+                    </div>
+                `;
+            } else {
+                const bodyHtml = isRawHtml ? content : escapeHtml(content);
+                msgDiv.innerHTML = `<div class="text">${bodyHtml}<div class="msg-meta">${timeStr}</div></div>`;
+            }
+
+            chatBody.appendChild(msgDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
+            if (saveToStorage && !isTransient) syncCurrentDomToSession(firstUserText);
+            return msgDiv;
+        }
+
+        function escapeHtml(text) {
+            return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        window.regenerateLast = function () {
+            const userMsgs = document.querySelectorAll("#chatBody .message.user");
+            if (userMsgs.length > 0) {
+                const lastQuery = userMsgs[userMsgs.length - 1].innerText.trim();
+                if (lastQuery) handleUserQuery(lastQuery);
+            }
+        };
+
+        window.copyText = function (containerId) {
+            const textElement = document.getElementById(containerId);
+            if (!textElement) return;
+            const clone = textElement.cloneNode(true);
+            clone.querySelectorAll("button, .msg-meta").forEach(b => b.remove());
+            navigator.clipboard.writeText(clone.innerText.trim()).then(() => alert("Copied to clipboard!"));
+        };
+
+        window.selectUseCase = function (useCaseName) {
+            const promptText = `Give me a clear, practical guide for ${useCaseName}.`;
+            document.getElementById("chat").scrollIntoView({ behavior: "smooth" });
+            handleUserQuery(promptText);
+        };
+
+        window.selectPlan = function (planName, cardId = "") {
+            if (cardId) triggerPriceCardAnim(cardId, planName);
+            const promptText = `I selected the ${planName} plan. Explain how I can get the most value from it.`;
+            document.getElementById("chat").scrollIntoView({ behavior: "smooth" });
+            handleUserQuery(promptText);
+        };
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (SpeechRecognition && micBtn) {
+            const recognition = new SpeechRecognition();
+            recognition.lang = "en-US";
+            micBtn.addEventListener("click", () => {
+                try {
+                    recognition.start();
+                    micBtn.style.color = "#ff0055";
+                    setLiveStatus("🎙️ Listening...");
+                } catch (_) {}
+            });
+            recognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript;
+                chatInputBox.value = transcript;
+                micBtn.style.color = "#00E5FF";
+                setLiveStatus("🔵 Ready");
+                handleUserQuery(transcript);
+            };
+            recognition.onerror = () => {
+                micBtn.style.color = "#00E5FF";
+                setLiveStatus("🔵 Ready");
+            };
+        }
+
+        function tryInstantUtilityOrSite(cleanQuery, queryLower) {
+            if (queryLower === "/help" || queryLower === "help") {
+                open50Hub();
+                addMessage("⚡ **50+ Features Hub** open kar diya gaya hai! Kisi bhi feature par click karein ya commands try karein: `/uuid`, `/wordcount`, `/encode`, `/decode`, `/flip`, `/dice`, `time`, `calculate ...`, `open ...`.", "ai", true);
+                return true;
+            }
+
+            if (queryLower === "/uuid") {
+                const uid = (crypto && crypto.randomUUID) ? crypto.randomUUID() : `nova-${Date.now()}-${Math.random().toString(16).slice(2, 10)}`;
+                addMessage(`🔑 **Generated UUID:**<br>\`${uid}\``, "ai", true);
+                return true;
+            }
+
+            if (queryLower.startsWith("/wordcount ")) {
+                const sample = cleanQuery.slice(11).trim();
+                const words = sample ? sample.split(/\s+/).length : 0;
+                const chars = sample.length;
+                addMessage(`📝 **Text Stats:**<br>• **Words:** ${words}<br>• **Characters:** ${chars}`, "ai", true);
+                return true;
+            }
+
+            if (queryLower.startsWith("/encode ")) {
+                const raw = cleanQuery.slice(8);
+                try {
+                    const enc = btoa(unescape(encodeURIComponent(raw)));
+                    addMessage(`🔐 **Base64 Encoded:**<br>\`${escapeHtml(enc)}\``, "ai", true);
+                } catch (_) {
+                    addMessage("⚠️ Encode nahi ho saka.", "ai");
+                }
+                return true;
+            }
+
+            if (queryLower.startsWith("/decode ")) {
+                const raw = cleanQuery.slice(8).trim();
+                try {
+                    const dec = decodeURIComponent(escape(atob(raw)));
+                    addMessage(`🔓 **Base64 Decoded:**<br>${escapeHtml(dec)}`, "ai", true);
+                } catch (_) {
+                    addMessage("⚠️ Valid Base64 text dein.", "ai");
+                }
+                return true;
+            }
+
+            if (queryLower === "/flip") {
+                const side = Math.random() < 0.5 ? "Heads" : "Tails";
+                addMessage(`🪙 **Coin Flip:** **${side}**!`, "ai", true);
+                return true;
+            }
+
+            if (queryLower === "/dice") {
+                const roll = Math.floor(Math.random() * 6) + 1;
+                addMessage(`🎲 **Dice Roll:** You rolled **${roll}**!`, "ai", true);
+                return true;
+            }
+
+            if (/\b(time|waqt|date|tarikh|aaj)\b/i.test(queryLower) && (queryLower.includes("kya") || queryLower.includes("what") || queryLower.includes("time") || queryLower.includes("date"))) {
+                const now = new Date();
+                const reply = `🕒 **Current Date & Time:**<br>• **Date:** ${now.toLocaleDateString("en-PK", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}<br>• **Time:** ${now.toLocaleTimeString("en-PK")}`;
+                addMessage(reply, "ai", true);
+                speak(`Current time is ${now.toLocaleTimeString("en-PK")}`);
+                return true;
+            }
+
+            const mathCandidate = cleanQuery.replace(/^(calculate|calc|solve|math|hisab)\s+/i, "").trim();
+            if (/^[\d\s+\-*/().%^]+$/.test(mathCandidate) && /\d/.test(mathCandidate) && /[+\-*/%^]/.test(mathCandidate)) {
+                try {
+                    const sanitized = mathCandidate.replace(/\^/g, "**");
+                    const result = Function(`"use strict"; return (${sanitized});`)();
+                    if (typeof result === "number" && Number.isFinite(result)) {
+                        const reply = `🧮 **Calculation Result:**<br>• **Expression:** \`${escapeHtml(mathCandidate)}\`<br>• **Answer:** **${result}**`;
+                        addMessage(reply, "ai", true);
+                        speak(`The answer is ${result}`);
+                        return true;
+                    }
+                } catch (_) {}
+            }
+
+            const openMatch = cleanQuery.match(/\b(?:open|kholo|karo\s+open|launch|visit)\s+(.+)$/i);
+            if (openMatch) {
+                const rawTarget = openMatch[1].replace(/\b(please|karo|kholo|website|site|web)\b/gi, "").trim().toLowerCase();
+
+                const knownSites = {
+                    youtube: "https://www.youtube.com",
+                    music: "https://music.youtube.com",
+                    "youtube music": "https://music.youtube.com",
+                    google: "https://www.google.com",
+                    tradingview: "https://www.tradingview.com/chart/",
+                    "trading view": "https://www.tradingview.com/chart/",
+                    binance: "https://www.binance.com",
+                    wikipedia: "https://en.wikipedia.org",
+                    github: "https://github.com",
+                    facebook: "https://www.facebook.com",
+                    instagram: "https://www.instagram.com",
+                    whatsapp: "https://web.whatsapp.com",
+                    linkedin: "https://www.linkedin.com",
+                    tiktok: "https://www.tiktok.com",
+                    netflix: "https://www.netflix.com",
+                    daraz: "https://www.daraz.pk",
+                    amazon: "https://www.amazon.com",
+                    canva: "https://www.canva.com",
+                    gmail: "https://mail.google.com",
+                    maps: "https://maps.google.com"
+                };
+
+                let targetUrl = "";
+                let label = rawTarget;
+
+                if (knownSites[rawTarget]) {
+                    targetUrl = knownSites[rawTarget];
+                } else if (/^[a-z0-9-]+(\.[a-z0-9-]+)+([/?#].*)?$/i.test(rawTarget)) {
+                    targetUrl = `https://${rawTarget}`;
+                } else if (rawTarget.includes("youtube")) {
+                    const q = rawTarget.replace(/youtube/gi, "").trim();
+                    targetUrl = q ? `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}` : "https://www.youtube.com";
+                } else if (rawTarget) {
+                    targetUrl = `https://www.google.com/search?q=${encodeURIComponent(rawTarget)}`;
+                    label = `${rawTarget} (Web Search)`;
+                }
+
+                if (targetUrl) {
+                    window.open(targetUrl, "_blank");
+                    const reply = `🌐 Opening <a href="${targetUrl}" target="_blank" style="color:#00E5FF; text-decoration:underline;">${escapeHtml(label)}</a>... 🚀`;
+                    addMessage(reply, "ai", true);
+                    speak(`Opening ${label}`);
+                    return true;
+                }
+            }
+
+            if (queryLower === "play music" || queryLower === "music play karo" || queryLower === "music") {
+                window.open("https://music.youtube.com", "_blank");
+                const reply = '🎵 Opening <a href="https://music.youtube.com" target="_blank" style="color:#00E5FF; text-decoration:underline;">YouTube Music</a>... 🚀';
+                addMessage(reply, "ai", true);
+                speak("Opening YouTube Music");
+                return true;
+            }
+
+            return false;
+        }
+
+        async function askNovaBrain(promptText, activeFile = null) {
+            const sess = getActiveSession();
+            const recentHistory = (sess && sess.messages ? sess.messages : [])
+                .slice(-6)
+                .map(m => ({ sender: m.sender, text: m.plain }));
+
+            const response = await fetch(BACKEND_CHAT_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    message: promptText,
+                    history: recentHistory,
+                    fileInfo: activeFile
+                })
+            });
+
+            const data = await response.json();
+            if (!response.ok || data.error) {
+                throw new Error(data.error || "Backend request failed");
+            }
+            return data.reply;
+        }
+
+        window.handleUserQuery = async function (rawQuery) {
+            const cleanQuery = rawQuery.trim();
+            const activeFile = pendingAttachment;
+
+            if (!cleanQuery && !activeFile) return;
+
+            const displayUserText = cleanQuery || `Uploaded ${activeFile.name}`;
+            const queryLower = displayUserText.toLowerCase();
+
+            if (activeFile) {
+                let previewHtml = `<div>${escapeHtml(displayUserText)}</div>`;
+                if (activeFile.type.startsWith("image/")) {
+                    previewHtml += `<img src="${activeFile.dataUrl}" alt="${escapeHtml(activeFile.name)}" style="max-width:260px; border-radius:10px; margin-top:8px; display:block;">`;
+                } else if (activeFile.type.startsWith("video/")) {
+                    previewHtml += `<video src="${activeFile.dataUrl}" controls style="max-width:280px; border-radius:10px; margin-top:8px; display:block;"></video>`;
+                } else {
+                    previewHtml += `<div style="margin-top:8px; padding:8px 10px; border-radius:8px; background:rgba(0,0,0,0.25); font-size:0.82rem;">📄 <strong>${escapeHtml(activeFile.name)}</strong> (${activeFile.sizeKB} KB)</div>`;
+                }
+                addMessage(previewHtml, "user", true, true, displayUserText);
+
+                pendingAttachment = null;
+                fileUploadInput.value = "";
+                attachedPreview.style.display = "none";
+                attachedFileLabel.textContent = "";
+            } else {
+                addMessage(cleanQuery, "user", false, true, cleanQuery);
+            }
+
+            chatInputBox.value = "";
+
+            if (!activeFile) {
+                if (tryInstantUtilityOrSite(cleanQuery, queryLower)) return;
+
+                if (/\b(image|picture|banao|draw|generate)\b/i.test(queryLower)) {
+                    setLiveStatus("🎨 Generating Visual...");
+                    const promptClean = cleanQuery.replace(/\b(generate|image|picture|of|banao|draw|ek|ki|please|an|a)\b/gi, "").trim() || "futuristic AI lab workspace";
+                    const replyText = `🎨 Generating image for: "${promptClean}"... ✨`;
+                    addMessage(replyText, "ai");
+                    speak(replyText);
+
+                    const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptClean)}?width=600&height=350&nologo=true`;
+                    const imgHtml = `Here is your generated image 🖼️:<br><img src="${imgUrl}" alt="AI Visual" style="width:100%; max-width:520px; border-radius:10px; margin-top:8px;">`;
+                    setTimeout(() => {
+                        addMessage(imgHtml, "ai", true);
+                        setLiveStatus("🔵 Ready");
+                    }, 600);
+                    return;
+                }
+            }
+
+            setLiveStatus("🧠 NovaAI Thinking...");
+            const thinkingHtml = `🤖 NovaAI soch raha hai<span class="typing-dots"><span></span><span></span><span></span></span>`;
+            const thinkingMsg = addMessage(thinkingHtml, "ai", true, false, "", true);
+
+            try {
+                const aiReply = await askNovaBrain(displayUserText, activeFile);
+                if (thinkingMsg && thinkingMsg.parentNode) chatBody.removeChild(thinkingMsg);
+
+                setLiveStatus("🔵 Ready");
+                addMessage(aiReply, "ai");
+                speak(aiReply);
+            } catch (err) {
+                if (thinkingMsg && thinkingMsg.parentNode) chatBody.removeChild(thinkingMsg);
+                setLiveStatus("⚠️ Check Backend");
+                addMessage(
+                    `⚠️ **Backend Connection Alert:** ${escapeHtml(err.message)}<br>• Check karein ke terminal mein **node server.js** chal raha hai aur **server.js** mein valid Gemini API key save hai.`,
+                    "ai",
+                    true
+                );
+            }
+        };
+
+        sendBtn.addEventListener("click", () => handleUserQuery(chatInputBox.value));
+        chatInputBox.addEventListener("keypress", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                handleUserQuery(chatInputBox.value);
+            }
+        });
+    </script>
 </body>
 
 </html>
