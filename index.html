@@ -1,4 +1,4 @@
-  <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -754,7 +754,7 @@
     <header>
         <nav class="navbar">
             <div class="logo">
-                <img src="logo.png" alt="NovaAI Logo">
+                <img src="./logo.png" alt="NovaAI Logo">
                 <h2>NovaAI</h2>
             </div>
             <ul class="nav-links">
@@ -772,14 +772,14 @@
         <div class="hero-left">
             <span class="hero-tag">🏆 Expo Edition v5.6 • 50+ Features • Gemini + Live Market AI</span>
             <h1>Experience the Power of <span>Artificial Intelligence</span></h1>
-            <p>NovaAI connects to your local Gemini backend with live market data for natural conversations, general knowledge, updates, crypto setups, image vision, file uploads, voice, saved chats, and 50+ smart features.</p>
+            <p>NovaAI connects to your Gemini backend with live market data for natural conversations, general knowledge, updates, crypto setups, image vision, file uploads, voice, saved chats, and 50+ smart features.</p>
             <div class="hero-buttons">
                 <a href="#chat" class="btn">Start Chat</a>
                 <a href="#features" class="btn-outline">Explore Features</a>
             </div>
         </div>
         <div class="hero-right">
-            <img src="ai-avatar.png" alt="NovaAI Assistant" id="heroAvatar">
+            <img src="./ai-avatar.png" alt="NovaAI Assistant" id="heroAvatar">
         </div>
     </section>
 
@@ -839,7 +839,7 @@
 
             <div class="chat-container main-chat-area">
                 <div class="chat-header">
-                    <img src="logo.png" alt="NovaAI">
+                    <img src="./logo.png" alt="NovaAI">
                     <span class="title-text" id="activeChatTitle">NovaAI Workspace</span>
 
                     <button type="button" class="hub-open-btn" id="open50HubBtn">
@@ -947,7 +947,7 @@
 
     <footer>
         <div class="footer-content">
-            <img src="logo.png" alt="NovaAI Logo">
+            <img src="./logo.png" alt="NovaAI Logo">
             <h2>NovaAI</h2>
             <p>Intelligent AI Assistant for Learning, Trading & Productivity.</p>
             <p class="copyright" style="margin-top:15px; color:var(--text-light); font-size:14px;">
@@ -1046,7 +1046,8 @@
         const liveStatePill = document.getElementById("liveStatePill");
         const activeChatTitle = document.getElementById("activeChatTitle");
 
-        const BACKEND_CHAT_URL = "http://localhost:3000/api/chat";
+        // Live Vercel / Express backend ke liye relative path
+        const BACKEND_CHAT_URL = "/api/chat";
         const ELEVENLABS_API_KEY = "sk_2de989c181095b947ba0718202956d5607e75fa5ffcc5264";
         const SESSIONS_KEY = "novaai_multi_sessions_v5_6";
         const ACTIVE_SESSION_KEY = "novaai_active_session_v5_6";
@@ -1081,7 +1082,7 @@
             welcomeDiv.className = "workspace-welcome";
             welcomeDiv.dataset.welcomeBanner = "true";
             welcomeDiv.innerHTML = `
-                <div class="workspace-badge"><img src="logo.png" alt="NovaAI Logo"></div>
+                <div class="workspace-badge"><img src="./logo.png" alt="NovaAI Logo"></div>
                 <h3>How can NovaAI help you today</h3>
                 <p>Ask anything, run a quick tool, or start with one of these workspace actions.</p>
                 <div class="starter-cards-grid">
@@ -1225,7 +1226,7 @@
                 if (textElem) {
                     msgs.push({
                         sender: isUser ? "user" : "ai",
-                        html: isUser ? textElem.innerHTML : `<img src="logo.png" alt="AI" class="avatar-img">${textElem.outerHTML}`,
+                        html: isUser ? textElem.innerHTML : `<img src="./logo.png" alt="AI" class="avatar-img">${textElem.outerHTML}`,
                         plain: textElem.innerText.trim()
                     });
                 }
@@ -1515,7 +1516,7 @@
             if (sender === "ai") {
                 const formattedContent = isRawHtml ? content : formatCleanText(content);
                 msgDiv.innerHTML = `
-                    <img src="logo.png" alt="AI" class="avatar-img">
+                    <img src="./logo.png" alt="AI" class="avatar-img">
                     <div class="text">
                         ${formattedContent}
                         ${!isTransient ? `<div class="msg-meta">${timeStr}</div>` : ""}
@@ -1822,7 +1823,7 @@
                 if (thinkingMsg && thinkingMsg.parentNode) chatBody.removeChild(thinkingMsg);
                 setLiveStatus("⚠️ Check Backend");
                 addMessage(
-                    `⚠️ **Backend Connection Alert:** ${escapeHtml(err.message)}<br>• Check karein ke terminal mein **node server.js** chal raha hai aur **server.js** mein valid Gemini API key save hai.`,
+                    `⚠️ **Backend Connection Alert:** ${escapeHtml(err.message)}<br>• Check karein ke Vercel Environment Variables mein **GEMINI_API_KEY** sahi set hai ya nahi.`,
                     "ai",
                     true
                 );
