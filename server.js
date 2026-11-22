@@ -1,12 +1,21 @@
  const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "15mb" }));
 
-// Yahan apni Google AI Studio wali Gemini API Key paste karein:
-const GEMINI_API_KEY = "process.env.GEMINI_API_KEY";
+// Static files (index.html, style.css, script.js, images) serve karne ke liye
+app.use(express.static(__dirname));
+
+// Main route ("/") par index.html dikhane ke liye
+app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, "index.html"));
+});
+
+// Environment variable se Gemini API Key read karein (quotes ke bagair)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // Live Crypto Prices & 4H/1H Candles fetch karne ka helper (Binance)
 async function getLiveCryptoContext(userMessage) {
@@ -81,9 +90,9 @@ app.post("/api/chat", async (req, res) => {
             return res.status(400).json({ error: "Message is required" });
         }
 
-        if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+        if (!GEMINI_API_KEY) {
             return res.status(400).json({
-                error: "Please add your Gemini API key inside server.js"
+                error: "Please set GEMINI_API_KEY in environment variables"
             });
         }
 
@@ -136,15 +145,15 @@ app.post("/api/chat", async (req, res) => {
 
         contents.push({ role: "user", parts: currentParts });
 
-          const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-const apiRes = await fetch(geminiUrl, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemInstruction }] },
-        contents
-    })
-});
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+        const apiRes = await fetch(geminiUrl, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                systemInstruction: { parts: [{ text: systemInstruction }] },
+                contents
+            })
+        });
 
         const data = await apiRes.json();
 
@@ -165,7 +174,7 @@ const apiRes = await fetch(geminiUrl, {
     }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`✅ NovaAI Gemini Backend running at http://localhost:${PORT}`);
 });
