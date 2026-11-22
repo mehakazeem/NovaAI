@@ -7,14 +7,23 @@ app.use(cors());
 app.use(express.json({ limit: "15mb" }));
 
 // Static files (index.html, style.css, script.js, images) serve karne ke liye
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname)));
 
 // Main route ("/") par index.html dikhane ke liye
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
-// Environment variable se Gemini API Key read karein (quotes ke bagair)
+// Images ke liye direct routes taake kabhi "Cannot GET" na aaye
+app.get("/ai-avatar.png", (req, res) => {
+    res.sendFile(path.join(__dirname, "ai-avatar.png"));
+});
+
+app.get("/logo.png", (req, res) => {
+    res.sendFile(path.join(__dirname, "logo.png"));
+});
+
+// Environment variable se Gemini API Key read karein
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 // Live Crypto Prices & 4H/1H Candles fetch karne ka helper (Binance)
